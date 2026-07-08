@@ -1,0 +1,225 @@
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+async function fetchWithCookies(url: string, options: RequestInit = {}) {
+  const res = await fetch(`${API_BASE}${url}`, {
+    ...options,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+  
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ detail: "Request failed" }));
+    throw new Error(error.detail || `HTTP ${res.status}`);
+  }
+  
+  return res;
+}
+
+export const api = {
+  files: {
+    upload: async (file: File): Promise<UploadedFile> => {
+      const formData = new FormData();
+      formData.append("file", file);
+      // No Content-Type header: the browser sets the multipart boundary
+      const res = await fetch(`${API_BASE}/files`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ detail: "Upload failed" }));
+        throw new Error(error.detail || `HTTP ${res.status}`);
+      }
+      return res.json();
+    },
+  },
+
+  auth: {
+    register: async (email: string, password: string) => {
+      const res = await fetchWithCookies("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      return res.json();
+    },
+    login: async (email: string, password: string) => {
+      const res = await fetchWithCookies("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      return res.json();
+    },
+    logout: async () => {
+      const res = await fetchWithCookies("/auth/logout", { method: "POST" });
+      return res.json();
+    },
+    me: async () => {
+      const res = await fetchWithCookies("/auth/me");
+      if (!res.ok) return null;
+      return res.json();
+    },
+  },
+
+  documents: {
+    list: async () => {
+      const res = await fetchWithCookies("/documents");
+      return res.json();
+    },
+    get: async (id: string) => {
+      const res = await fetchWithCookies(`/documents/${id}`);
+      return res.json();
+    },
+    create: async (data: { title?: string; prompt: string; latex: string }) => {
+      const res = await fetchWithCookies("/documents", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
+    delete: async (id: string) => {
+      const res = await fetchWithCookies(`/documents/${id}`, { method: "DELETE" });
+      return res.json();
+    },
+    getVersions: async (docId: string) => {
+      const res = await fetchWithCookies(`/documents/${docId}/versions`);
+      return res.json();
+    },
+    getVersion: async (docId: string, versionId: string) => {
+      const res = await fetchWithCookies(`/documents/${docId}/versions/${versionId}`);
+      return res.json();
+    },
+  },
+
+  conversations: {
+    list: async () => {
+      const res = await fetchWithCookies("/conversations");
+      return res.json();
+    },
+    get: async (id: string) => {
+      const res = await fetchWithCookies(`/conversations/${id}`);
+      return res.json();
+    },
+    delete: async (id: string) => {
+      const res = await fetchWithCookies(`/conversations/${id}`, { method: "DELETE" });
+      return res.json();
+    },
+    touch: async (id: string) => {
+      const res = await fetchWithCookies(`/conversations/${id}`, { method: "PATCH" });
+      return res.json();
+    },
+  },
+
+  agent: {
+    stream: async (
+      prompt: string,
+      onChunk: (data: AgentEvent) => void,
+      conversationHistory: Array<{role: string; content: string}> = [],
+      conversationId?: string | null,
+      fileIds: string[] = []
+    ): Promise<AgentEvent | null> => {
+      const res = await fetchWithCookies("/v2/agent/stream", {
+        method: "POST",
+        body: JSON.stringify({
+          prompt,
+          conversation_history: conversationHistory,
+          conversation_id: conversationId || undefined,
+          file_ids: fileIds.length > 0 ? fileIds : undefined
+        }),
+      });
+
+      const reader = res.body?.getReader();
+      if (!reader) return null;
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let lastEvent: AgentEvent | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              lastEvent = data;
+              onChunk(data);
+            } catch {
+              onChunk({ status: "raw", raw: line.slice(6) });
+            }
+          }
+        }
+      }
+
+      if (buffer.startsWith("data: ")) {
+        try {
+          const data = JSON.parse(buffer.slice(6));
+          lastEvent = data;
+          return data;
+        } catch {
+          return lastEvent;
+        }
+      }
+      return lastEvent;
+    },
+
+    submitAsync: async (prompt: string) => {
+      const res = await fetchWithCookies("/v2/agent/async", {
+        method: "POST",
+        body: JSON.stringify({ prompt }),
+      });
+      return res.json();
+    },
+
+    getStatus: async (jobId: string) => {
+      const res = await fetchWithCookies(`/status/${jobId}`);
+      return res.json();
+    },
+
+    compile: async (latex: string) => {
+      const res = await fetchWithCookies("/compile", {
+        method: "POST",
+        body: JSON.stringify({ latex }),
+      });
+      return res.json();
+    },
+  },
+};
+
+export interface UploadedFile {
+  file_id: string;
+  filename: string;
+  row_count: number;
+  columns: string[];
+}
+
+export interface AgentEvent {
+  status?: string;
+  latex?: string;
+  error?: string;
+  message?: string;
+  pdf_path?: string;
+  pdf_url?: string;
+  retries?: number;
+  raw?: string;
+  version_id?: string;
+  version_number?: number;
+  conversation_id?: string;
+}
+
+export interface JobStatus {
+  job_id: string;
+  status: string;
+  pdf_url?: string;
+  latex?: string;
+  error?: string;
+  attempts?: number;
+  meta?: { step: string };
+}
