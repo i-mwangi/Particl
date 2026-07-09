@@ -60,6 +60,30 @@ export default function EditorPage() {
   const router = useRouter();
   const [exportOpen, setExportOpen] = useState(false);
   const [filesOpen, setFilesOpen] = useState(false);
+  const [codeVisible, setCodeVisible] = useState(true);
+  const [splitPct, setSplitPct] = useState(50);
+  const splitRef = useRef<HTMLDivElement>(null);
+
+  const startSplitDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const container = splitRef.current;
+    if (!container) return;
+    const onMove = (ev: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      const pct = ((ev.clientX - rect.left) / rect.width) * 100;
+      setSplitPct(Math.min(75, Math.max(25, pct)));
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
   const [projectLabel, setProjectLabel] = useState<string | null>(null);
 
   const formatProjectDate = (d: Date) =>
@@ -934,15 +958,26 @@ export default function EditorPage() {
                 zIndex: 1000,
                 overflow: "hidden",
               }}>
-                <div style={{
-                  display: "flex", alignItems: "center", gap: "8px",
-                  padding: "9px 12px",
-                  background: "var(--bg-surface)",
-                  color: "var(--text-primary)", fontSize: "12px",
-                }}>
+                <button
+                  onClick={() => { setCodeVisible((v) => !v); setFilesOpen(false); }}
+                  title={codeVisible ? "Hide code" : "Show code"}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "8px",
+                    width: "100%",
+                    padding: "9px 12px",
+                    border: "none",
+                    background: "var(--bg-surface)",
+                    color: "var(--text-primary)", fontSize: "12px",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                  main.tex
-                </div>
+                  <span style={{ flex: 1 }}>main.tex</span>
+                  <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>
+                    {codeVisible ? "shown" : "hidden"}
+                  </span>
+                </button>
                 <div style={{
                   padding: "8px 12px 4px",
                   fontSize: "10px",
@@ -1079,7 +1114,7 @@ export default function EditorPage() {
           </div>
         </div>
 
-        <div style={{
+        <div ref={splitRef} style={{
           display: "flex",
           flex: 1,
           minHeight: 0,
@@ -1104,13 +1139,14 @@ export default function EditorPage() {
           </div>
         ) : (
         <>
-        {/* Left Side - Editor */}
-        <div className="editor-pane" style={{ 
-          flex: 1, 
-          display: "flex", 
+        {/* Left Side - Editor (fully hidden when the code is hidden; reopen via Files -> main.tex) */}
+        <div className="editor-pane" style={{
+          flex: "none",
+          width: `${splitPct}%`,
+          minWidth: 0,
+          display: codeVisible ? "flex" : "none",
           flexDirection: "column",
-          borderRight: "1px solid var(--border)",
-          overflow: "hidden"
+          overflow: "hidden",
         }}>
           {/* Agent Status Bar - Small, Above Prompt */}
           {(status !== "idle" || isLiveEditing) && (
@@ -1204,7 +1240,7 @@ export default function EditorPage() {
                 {/* A4 code sheet with a main.tex file-tab header — full width, A4-tall */}
                 <div style={{
                   width: "100%",
-                  aspectRatio: "210 / 297",
+                  aspectRatio: codeVisible ? "210 / 297" : undefined,
                   height: "auto",
                   flexShrink: 0,
                   margin: "0 auto",
@@ -1216,16 +1252,22 @@ export default function EditorPage() {
                   overflow: "hidden",
                   boxShadow: "0 6px 28px rgba(0,0,0,0.14)"
                 }}>
-                  {/* File-tab header */}
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "8px 14px",
-                    borderBottom: "1px solid var(--border)",
-                    background: "var(--bg-elevated)",
-                    flexShrink: 0,
-                  }}>
+                  {/* File-tab header — click to show/hide the code */}
+                  <div
+                    onClick={() => setCodeVisible((v) => !v)}
+                    title={codeVisible ? "Hide code" : "Show code"}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "8px 14px",
+                      borderBottom: codeVisible ? "1px solid var(--border)" : "none",
+                      background: "var(--bg-elevated)",
+                      flexShrink: 0,
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                  >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                     <span style={{
                       fontSize: "13px",
@@ -1235,6 +1277,20 @@ export default function EditorPage() {
                     }}>
                       main.tex
                     </span>
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="var(--text-muted)"
+                      strokeWidth="2"
+                      style={{
+                        transform: codeVisible ? "rotate(0deg)" : "rotate(-90deg)",
+                        transition: "transform 0.2s ease",
+                      }}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
                     <div style={{ flex: 1 }} />
                     <div style={{
                       display: "flex",
@@ -1261,22 +1317,24 @@ export default function EditorPage() {
                         : "Ready"}
                     </div>
                   </div>
-                  <LatexEditor
-                    value={latexCode}
-                    onChange={setLatexCode}
-                    disabled={isStreaming}
-                    isStreaming={isStreaming}
-                    autoScroll={true}
-                    style={{
-                      flex: 1,
-                      minHeight: 0,
-                      width: "100%",
-                      height: "auto",
-                      border: "none",
-                      borderRadius: 0,
-                      boxShadow: "none",
-                    }}
-                  />
+                  {codeVisible && (
+                    <LatexEditor
+                      value={latexCode}
+                      onChange={setLatexCode}
+                      disabled={isStreaming}
+                      isStreaming={isStreaming}
+                      autoScroll={true}
+                      style={{
+                        flex: 1,
+                        minHeight: 0,
+                        width: "100%",
+                        height: "auto",
+                        border: "none",
+                        borderRadius: 0,
+                        boxShadow: "none",
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             ) : (
@@ -1331,10 +1389,55 @@ export default function EditorPage() {
 
         </div>
 
-        {/* Right Side - PDF Display */}
-        <div style={{ 
-          width: "50%", 
-          display: "flex", 
+        {/* Drag handle between the code and PDF panes */}
+        {codeVisible && (
+          <div
+            onMouseDown={startSplitDrag}
+            title="Drag to resize"
+            style={{
+              width: "9px",
+              margin: "0 -2px",
+              flexShrink: 0,
+              cursor: "col-resize",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              zIndex: 5,
+            }}
+          >
+            {/* divider line */}
+            <div style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: "50%",
+              width: "1px",
+              background: "var(--border)",
+            }} />
+            {/* grip */}
+            <div style={{
+              position: "relative",
+              width: "10px",
+              height: "34px",
+              borderRadius: "5px",
+              border: "1px solid var(--border)",
+              background: "var(--bg-elevated)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+            }}>
+              <div style={{ width: "2px", height: "16px", borderRadius: "1px", background: "var(--text-muted)" }} />
+            </div>
+          </div>
+        )}
+
+        {/* Right Side - PDF Display (expands to the central area when the code is hidden) */}
+        <div style={{
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
           flexDirection: "column",
           background: "var(--bg-surface)",
           overflow: "hidden"
@@ -1350,7 +1453,7 @@ export default function EditorPage() {
             justifyContent: "center"
           }}>
             {pdfUrl ? (
-              <PdfViewer url={pdfUrl} />
+              <PdfViewer url={pdfUrl} focusZoom={!codeVisible} />
             ) : status === "compiling" ? (
               <div style={{ 
                 display: "flex", 
