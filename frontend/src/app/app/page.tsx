@@ -273,7 +273,7 @@ export default function AppDashboard() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept=".csv,.png,.jpg,.jpeg"
             multiple
             style={{ display: "none" }}
             onChange={(e) => {
@@ -297,10 +297,10 @@ export default function AppDashboard() {
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
           <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>
-            {isUploading ? "Uploading..." : "Drop your data files here"}
+            {isUploading ? "Uploading..." : "Drop your data or image files here"}
           </p>
           <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px" }}>
-            or click to browse (.csv)
+            or click to browse (.csv, .png, .jpg)
           </p>
           {attachedFiles.length > 0 && (
             <div
