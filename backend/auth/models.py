@@ -26,4 +26,12 @@ class UserResponse(BaseModel):
     id: str
     email: str
     role: str
+    onboarding: Optional[dict] = None
     created_at: Optional[datetime] = None
+
+
+class OnboardingData(BaseModel):
+    use_case: str
+    use_case_detail: str = ""
+    source: str
+    source_detail: str = ""
