@@ -22,7 +22,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register(email, password);
-      router.push("/app");
+      router.push("/onboarding");
     } catch {
       setError("Registration failed. Email may already be in use.");
     } finally {
