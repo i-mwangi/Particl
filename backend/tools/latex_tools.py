@@ -9,7 +9,7 @@ from tools.compiler import (
 
 
 @tool
-def compile_latex_tool(latex: str) -> dict:
+def compile_latex_tool(latex: str, image_paths: list = None) -> dict:
     """
     Compiles LaTeX using robust multi-engine compilation with comprehensive error handling.
 
@@ -21,10 +21,13 @@ def compile_latex_tool(latex: str) -> dict:
     - Intelligent error recovery
     - Progressive fixes per engine
 
+    image_paths: optional (latex_filename, disk_path) pairs of uploaded images
+    staged into the compile directory for \\includegraphics.
+
     Returns dict with success status, pdf_path, error details, and compilation metadata.
     """
     try:
-        pdf_path = compile_latex(latex)
+        pdf_path = compile_latex(latex, image_paths=image_paths)
         return {
             "success": True,
             "pdf_path": pdf_path,
