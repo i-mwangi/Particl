@@ -1,19 +1,28 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface PdfViewerProps {
   url: string;
+  /** When true, snap zoom to 110% (used when the code pane is hidden). */
+  focusZoom?: boolean;
 }
 
-const ZOOM_LEVELS = [0.5, 0.65, 0.78, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2];
+const ZOOM_LEVELS = [0.5, 0.65, 0.78, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2];
+const DEFAULT_IDX = 3; // 90%
+const FOCUS_IDX = ZOOM_LEVELS.indexOf(1.1); // 110%
 
-export default function PdfViewer({ url }: PdfViewerProps) {
+export default function PdfViewer({ url, focusZoom = false }: PdfViewerProps) {
   const [numPages, setNumPages] = useState(0);
-  const [zoomIdx, setZoomIdx] = useState(3); // 90%
+  const [zoomIdx, setZoomIdx] = useState(DEFAULT_IDX);
   const zoom = ZOOM_LEVELS[zoomIdx];
+
+  // Entering focus mode zooms to 110%; leaving it returns to the default 90%.
+  useEffect(() => {
+    setZoomIdx(focusZoom ? FOCUS_IDX : DEFAULT_IDX);
+  }, [focusZoom]);
 
   return (
     <div
