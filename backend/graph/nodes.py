@@ -5,21 +5,26 @@ import math
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
 from graph.state import LatexAgentState
 from tools.latex_tools import compile_latex_tool
 
 load_dotenv()
 
-_llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    google_api_key=os.getenv("GEMINI_API_KEY"),
+# Qwen via Alibaba Cloud Model Studio's OpenAI-compatible endpoint.
+# QWEN_MODEL: qwen3.7-plus (default, cost-effective) or qwen3.7-max (strongest).
+_llm = ChatOpenAI(
+    model=os.getenv("QWEN_MODEL", "qwen3.7-plus"),
+    api_key=os.getenv("QWEN_API_KEY") or os.getenv("DASHSCOPE_API_KEY") or "not-set",
+    base_url=os.getenv(
+        "QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    ),
     temperature=0.7,
     # Allow long, comprehensive documents instead of truncating mid-way.
     # (The fix loop re-emits the WHOLE document, so this must comfortably
-    # exceed the largest doc we generate; 2.5-flash supports up to 65536.)
-    max_output_tokens=65536,
+    # exceed the largest doc we generate.)
+    max_tokens=int(os.getenv("QWEN_MAX_OUTPUT_TOKENS", "65536")),
 )
 
 # System prompt: prioritise substance and clean academic structure over decoration.
@@ -28,7 +33,27 @@ _GENERATE_SYSTEM = (
     "documents - the kind a domain expert would submit, not a thin summary.\n"
     "Return ONLY valid, compilable LaTeX code - no explanations, no markdown fences.\n"
     "Always include \\documentclass, \\begin{document}, and \\end{document}.\n\n"
-    "DEPTH AND SUBSTANCE (most important):\n"
+    "DOCUMENT TYPE - MATCH THE FORM TO THE REQUEST (read this first):\n"
+    "The DEPTH AND SUBSTANCE and STRUCTURE rules below apply to LONG-FORM documents:\n"
+    "reports, papers, theses, specifications, proposals, lecture notes, documentation.\n"
+    "SHORT-FORM documents follow their own conventions instead - never pad them to\n"
+    "8-15 pages and never force article-style sections onto them:\n"
+    "- PRESENTATIONS / slides / decks: use \\documentclass{beamer}. One idea per frame,\n"
+    "  6-12 frames for a typical talk, short bullet lines (not paragraphs), a title\n"
+    "  frame (\\titlepage) and an outline frame (\\tableofcontents) at the start.\n"
+    "  Use a restrained built-in theme (e.g. \\usetheme{Madrid} or default), no\n"
+    "  overloaded slides. Equations, TikZ and pgfplots work normally inside frames.\n"
+    "  Do NOT load geometry or fancyhdr with beamer, and ignore the page-count and\n"
+    "  tableofcontents-after-maketitle guidance below.\n"
+    "- CV / RESUME: 1-2 pages, \\documentclass[10pt]{article} with tight geometry\n"
+    "  margins, clear section headings (starred \\section*), tabular or itemize layout,\n"
+    "  no table of contents, no abstract, no page-count padding.\n"
+    "- LETTERS: \\documentclass{letter} (or a minimal article layout), one page,\n"
+    "  sender/recipient blocks, \\opening and \\closing - nothing else.\n"
+    "- INVOICES / transactional documents: one page, a booktabs tabular of line items\n"
+    "  with computed totals, issuer/client blocks, invoice number and date. When a\n"
+    "  data file is provided, the line items MUST come from that data.\n\n"
+    "DEPTH AND SUBSTANCE (long-form documents - most important):\n"
     "- Be COMPREHENSIVE. Cover the topic in full: aim for many substantial sections,\n"
     "  each with real subsections, explanation, examples, and detail. A serious\n"
     "  document is typically 8-15+ pages, not 3-5.\n"
@@ -40,6 +65,8 @@ _GENERATE_SYSTEM = (
     "  comparison tables with actual rows, and (where useful) diagrams.\n\n"
     "STRUCTURE (clean academic form by default):\n"
     "- Use \\documentclass[11pt]{article} with \\usepackage[margin=1in]{geometry}.\n"
+    "- EXCEPTION - theses and books: use \\documentclass[11pt]{report} (or book) and\n"
+    "  organise the work into real \\chapter{...} divisions with sections inside them.\n"
     "- Give it \\title / \\author / \\date{\\today} / \\maketitle and a short abstract\n"
     "  when appropriate.\n"
     "- Use NUMBERED \\section, \\subsection, \\subsubsection (NOT starred \\section*),\n"
