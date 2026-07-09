@@ -76,7 +76,7 @@ def health_check():
 
 @router.post("/files", status_code=201)
 async def upload_data_file(request: Request, file: UploadFile = File(...)):
-    """Upload a data file (CSV) to use as context for document generation."""
+    """Upload a context file: CSV data or a PNG/JPEG image for the document."""
     user_id = get_current_user(request)
     if redis_rate.is_rate_limited(_get_client_id(request)):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
@@ -91,14 +91,24 @@ async def upload_data_file(request: Request, file: UploadFile = File(...)):
 
     content = await file.read()
     try:
-        summary = file_service.parse_csv(file.filename, content)
+        if ext in file_service.IMAGE_EXTENSIONS:
+            summary = file_service.parse_image(user_id, file.filename, content)
+        else:
+            summary = file_service.parse_csv(file.filename, content)
     except file_service.FileValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     file_id = file_service.store_file_summary(user_id, summary)
+    if summary.get("kind") == "image":
+        return {
+            "file_id": file_id,
+            "filename": summary["filename"],
+            "kind": "image",
+        }
     return {
         "file_id": file_id,
         "filename": summary["filename"],
+        "kind": "csv",
         "row_count": summary["row_count"],
         "columns": [c["name"] for c in summary["columns"]],
     }
@@ -117,7 +127,10 @@ async def compile_document(request: Request, data: CompileRequest):
     if redis_rate.is_rate_limited(_get_client_id(request)):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
     try:
-        pdf_path = compile_latex(data.latex)
+        image_paths = file_service.get_image_paths(
+            get_current_user(request), data.file_ids or []
+        )
+        pdf_path = compile_latex(data.latex, image_paths=image_paths)
         pdf_url = upload_pdf(
             local_path=pdf_path,
             user_id=get_current_user(request),
@@ -427,7 +440,11 @@ async def agent_stream(
             yield f"data: {json.dumps(state)}\n\n"
 
             result = await run_in_threadpool(
-                compile_latex_tool.invoke, {"latex": final_latex}
+                compile_latex_tool.invoke,
+                {
+                    "latex": final_latex,
+                    "image_paths": file_service.get_image_paths(user_id, file_ids or []),
+                },
             )
 
             if result["success"]:
