@@ -25,6 +25,7 @@ const DOC_FEATURES = [
   { id: "code", label: "Code listings", hint: "syntax-highlighted code listings" },
   { id: "bibliography", label: "Bibliography", hint: "a bibliography with \\cite citations" },
   { id: "color", label: "Color accents", hint: "tasteful color accents (xcolor)" },
+  { id: "poster", label: "Poster-style design", hint: "a designed one-page poster/flyer layout with bold color blocks" },
 ];
 
 /** Render **bold** spans inside a line of message text */
