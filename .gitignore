@@ -1,3 +1,6 @@
 ﻿.claude
 .DS_Store
 node_modules/
+.cursorrules
+IMPLEMENTATION_PLAN.local.md
+push-files.ps1
