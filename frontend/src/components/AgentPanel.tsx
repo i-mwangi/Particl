@@ -15,6 +15,18 @@ interface AgentPanelProps {
   onSend: (text: string) => void;
 }
 
+/** Optional document features the user can tick; unticked = agent decides. */
+const DOC_FEATURES = [
+  { id: "tables", label: "Tables", hint: "professional booktabs tables" },
+  { id: "charts", label: "Charts & box plots", hint: "pgfplots charts (box plots where statistics fit)" },
+  { id: "diagrams", label: "Diagrams", hint: "TikZ diagrams" },
+  { id: "gantt", label: "Gantt timeline", hint: "a pgfgantt project timeline" },
+  { id: "equations", label: "Numbered equations", hint: "numbered amsmath equations" },
+  { id: "code", label: "Code listings", hint: "syntax-highlighted code listings" },
+  { id: "bibliography", label: "Bibliography", hint: "a bibliography with \\cite citations" },
+  { id: "color", label: "Color accents", hint: "tasteful color accents (xcolor)" },
+];
+
 /** Render **bold** spans inside a line of message text */
 function renderRichText(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -111,6 +123,11 @@ export default function AgentPanel({
 }: AgentPanelProps) {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const [input, setInput] = useState("");
+  const [featuresOpen, setFeaturesOpen] = useState(false);
+  const [features, setFeatures] = useState<string[]>([]);
+
+  const toggleFeature = (id: string) =>
+    setFeatures((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
   const dragOffset = useRef<{ dx: number; dy: number } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -154,9 +171,14 @@ export default function AgentPanel({
   };
 
   const submit = () => {
-    const text = input.trim();
+    let text = input.trim();
     if (!text || isBusy) return;
+    if (features.length > 0) {
+      const hints = DOC_FEATURES.filter((f) => features.includes(f.id)).map((f) => f.hint);
+      text += `\n\nThe document should include: ${hints.join("; ")}.`;
+    }
     setInput("");
+    setFeaturesOpen(false);
     onSend(text);
   };
 
@@ -369,6 +391,80 @@ export default function AgentPanel({
         )}
       </div>
 
+      {/* Document features checklist */}
+      {featuresOpen && (
+        <div
+          style={{
+            borderTop: "1px solid var(--border)",
+            background: "var(--bg-elevated)",
+            padding: "10px 12px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "8px" }}>
+            <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-primary)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+              Include in document
+            </span>
+            <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>
+              {features.length === 0 ? "none ticked — the agent decides" : `${features.length} selected`}
+            </span>
+            {features.length > 0 && (
+              <button
+                onClick={() => setFeatures([])}
+                style={{ marginLeft: "auto", border: "none", background: "none", color: "var(--accent)", fontSize: "10px", cursor: "pointer", padding: 0 }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+            {DOC_FEATURES.map((f) => {
+              const on = features.includes(f.id);
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => toggleFeature(f.id)}
+                  title={f.hint}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "7px",
+                    padding: "6px 9px",
+                    borderRadius: "7px",
+                    border: on ? "1px solid var(--accent)" : "1px solid var(--border)",
+                    background: on ? "var(--accent-dim)" : "var(--bg-surface)",
+                    color: "var(--text-primary)",
+                    fontSize: "11px",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "13px",
+                      height: "13px",
+                      borderRadius: "4px",
+                      border: on ? "none" : "1px solid var(--border)",
+                      background: on ? "var(--accent)" : "transparent",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {on && (
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </span>
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div
         style={{
@@ -378,6 +474,48 @@ export default function AgentPanel({
           borderTop: "1px solid var(--border)",
         }}
       >
+        <button
+          onClick={() => setFeaturesOpen((o) => !o)}
+          title="Choose document features"
+          aria-label="Choose document features"
+          style={{
+            position: "relative",
+            padding: "8px 10px",
+            borderRadius: "8px",
+            border: featuresOpen || features.length > 0 ? "1px solid var(--accent)" : "1px solid var(--border)",
+            background: featuresOpen ? "var(--accent-dim)" : "var(--bg-base)",
+            color: features.length > 0 ? "var(--accent)" : "var(--text-muted)",
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" /><circle cx="9" cy="7" r="2.2" fill="var(--bg-base)" />
+            <line x1="4" y1="14" x2="20" y2="14" /><circle cx="15" cy="14" r="2.2" fill="var(--bg-base)" />
+          </svg>
+          {features.length > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: "-5px",
+                right: "-5px",
+                minWidth: "14px",
+                height: "14px",
+                borderRadius: "7px",
+                background: "var(--accent)",
+                color: "#fff",
+                fontSize: "9px",
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0 3px",
+              }}
+            >
+              {features.length}
+            </span>
+          )}
+        </button>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
