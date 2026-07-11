@@ -330,9 +330,17 @@ async def agent_stream(
 
     try:
         if conv_id:
-            conv = db_queries.get_conversation(conv_id)
-            if not conv or conv["user_id"] != user_id:
-                conv_id = None
+            # Retry once: a stale Supabase connection must not kill the stream
+            for db_attempt in range(2):
+                try:
+                    conv = db_queries.get_conversation(conv_id)
+                    if not conv or conv["user_id"] != user_id:
+                        conv_id = None
+                    break
+                except Exception:
+                    if db_attempt == 1:
+                        raise
+                    await asyncio.sleep(0.5)
 
         if not conv_id:
             title_messages = [
@@ -359,7 +367,11 @@ async def agent_stream(
             conv = db_queries.create_conversation(conv_data)
             conv_id = conv["id"]
         else:
-            db_queries.update_conversation(conv_id, {"status": "in_progress"})
+            try:
+                db_queries.update_conversation(conv_id, {"status": "in_progress"})
+            except Exception as status_exc:
+                # Cosmetic update - never abort a generation over it
+                print(f"[WARN] Could not mark conversation in_progress: {status_exc}")
 
         state = {
             **initial_state,
@@ -376,14 +388,24 @@ async def agent_stream(
         # Build messages with conversation history
         messages = [SystemMessage(content=_GENERATE_SYSTEM)]
 
-        # Add conversation history
+        # Add conversation history. The LAST assistant message carries the
+        # current document - pass it through whole, or the model cannot
+        # preserve the existing LaTeX when asked for an edit.
         if conversation_history:
+            msgs = conversation_history[-5:]
+            last_assistant_idx = max(
+                (i for i, m in enumerate(msgs) if m.role != "user"), default=-1
+            )
             history_context = "\n\nPrevious conversation:\n"
-            for msg in conversation_history[-5:]:  # Last 5 messages for context
+            for i, msg in enumerate(msgs):
                 role = "User" if msg.role == "user" else "Assistant"
-                history_context += f"\n{role}: {msg.content[:200]}"
+                limit = 60000 if i == last_assistant_idx else 500
+                history_context += f"\n{role}: {msg.content[:limit]}"
 
-            prompt_with_context = f"{history_context}\n\nNew request: {prompt}"
+            prompt_with_context = (
+                f"{history_context}\n\nNew request (apply to the document above, "
+                f"changing only what is asked): {prompt}"
+            )
         else:
             prompt_with_context = f"Create a LaTeX document for: {prompt}"
 
