@@ -38,7 +38,7 @@ const EXAMPLES = [
 function Arrow({ color }: { color: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 2px" }}>
-      <svg width="34" height="34" viewBox="0 0 24 24" fill={color} style={{ transition: "fill 0.4s ease", flexShrink: 0 }}>
+      <svg width="52" height="52" viewBox="0 0 24 24" fill={color} style={{ transition: "fill 0.4s ease", flexShrink: 0 }}>
         <path d="M4 9h8V5l8 7-8 7v-4H4z" />
       </svg>
     </div>
@@ -56,9 +56,9 @@ export default function HowItWorks() {
   const ex = EXAMPLES[active];
 
   return (
-    <div style={{ maxWidth: "980px", margin: "0 auto" }}>
+    <div style={{ maxWidth: "1240px", margin: "0 auto" }}>
       {/* Column captions */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 38px 1fr 38px 1fr", gap: "10px", marginBottom: "16px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 56px 1fr 56px 1fr", gap: "16px", marginBottom: "28px" }}>
         {[
           <span key="a"><strong>Describe it</strong> in plain English — no LaTeX required.</span>,
           <span key="s1" />,
@@ -66,18 +66,18 @@ export default function HowItWorks() {
           <span key="s2" />,
           <span key="c"><strong>Download</strong> a finished, vector-sharp PDF.</span>,
         ].map((c, i) => (
-          <p key={i} style={{ fontSize: "13px", lineHeight: 1.55, color: "var(--text-secondary)" }}>{c}</p>
+          <p key={i} style={{ fontSize: "15.5px", lineHeight: 1.6, color: "var(--text-secondary)" }}>{c}</p>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 38px 1fr 38px 1fr", gap: "10px", alignItems: "center" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 56px 1fr 56px 1fr", gap: "16px", alignItems: "center" }}>
         {/* Prompt card */}
         <div className="soft-card" style={{ padding: 0, overflow: "hidden", alignSelf: "stretch", display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "7px", padding: "8px 12px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
-            <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: ex.accent, transition: "background 0.4s ease" }} />
-            <span className="mono" style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>prompt</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "11px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
+            <span style={{ width: "9px", height: "9px", borderRadius: "50%", background: ex.accent, transition: "background 0.4s ease" }} />
+            <span className="mono" style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>prompt</span>
           </div>
-          <p key={ex.id} className="mono" style={{ padding: "14px", fontSize: "12px", lineHeight: 1.7, color: "var(--text-primary)", animation: "fadeUp 0.45s ease", margin: 0, flex: 1 }}>
+          <p key={ex.id} className="mono" style={{ padding: "22px", fontSize: "14.5px", lineHeight: 1.85, color: "var(--text-primary)", animation: "fadeUp 0.45s ease", margin: 0, flex: 1 }}>
             &quot;{ex.prompt}&quot;
           </p>
         </div>
@@ -85,7 +85,7 @@ export default function HowItWorks() {
         <Arrow color={ex.accent} />
 
         {/* Document type cards */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
           {EXAMPLES.map((e, i) => {
             const on = i === active;
             return (
@@ -94,8 +94,8 @@ export default function HowItWorks() {
                 onClick={() => setActive(i)}
                 style={{
                   textAlign: "left",
-                  padding: "13px 15px",
-                  borderRadius: "10px",
+                  padding: "28px 24px",
+                  borderRadius: "12px",
                   border: on ? `1px solid ${e.accent}` : "1px solid var(--border)",
                   background: on
                     ? `linear-gradient(100deg, ${e.tint}, var(--bg-surface))`
@@ -104,10 +104,10 @@ export default function HowItWorks() {
                   transition: "background 0.4s ease, border-color 0.4s ease",
                 }}
               >
-                <span className="mono" style={{ display: "block", fontSize: "10.5px", color: on ? e.accent : "var(--text-muted)", marginBottom: "3px", transition: "color 0.4s ease" }}>
+                <span className="mono" style={{ display: "block", fontSize: "12.5px", color: on ? e.accent : "var(--text-muted)", marginBottom: "6px", transition: "color 0.4s ease" }}>
                   {e.sub}
                 </span>
-                <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>{e.label}</span>
+                <span style={{ fontSize: "17px", fontWeight: 600, color: "var(--text-primary)" }}>{e.label}</span>
               </button>
             );
           })}
@@ -119,14 +119,14 @@ export default function HowItWorks() {
         <div
           style={{
             alignSelf: "stretch",
-            borderRadius: "12px",
+            borderRadius: "14px",
             background: "var(--bg-elevated)",
             border: "1px solid var(--border-subtle)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "18px",
-            minHeight: "330px",
+            padding: "28px",
+            minHeight: "480px",
           }}
         >
           <img
@@ -135,12 +135,12 @@ export default function HowItWorks() {
             alt={`Compiled PDF page: ${ex.label}`}
             style={{
               maxWidth: "100%",
-              maxHeight: "300px",
+              maxHeight: "430px",
               width: "auto",
               height: "auto",
               display: "block",
               background: "#fff",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+              boxShadow: "0 12px 36px rgba(0,0,0,0.2)",
               borderRadius: "3px",
               animation: "fadeUp 0.45s ease",
             }}
