@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from auth.models import OnboardingData, UserCreate, UserLogin, UserResponse
@@ -6,6 +8,24 @@ from auth import utils as auth_utils
 from db import users as user_queries
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Cookie flags. Defaults (lax / not-secure) suit same-origin local dev.
+# For a cross-site deployment (frontend and backend on different domains),
+# browsers only store the session cookie if it is SameSite=None; Secure, so
+# set COOKIE_SAMESITE=none and COOKIE_SECURE=true in that environment.
+_COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
+_COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
+
+
+def _set_session_cookie(response: Response, session_id: str) -> None:
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        httponly=True,
+        samesite=_COOKIE_SAMESITE,
+        secure=_COOKIE_SECURE,
+        max_age=86400,
+    )
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -18,14 +38,7 @@ async def register(data: UserCreate, response: Response):
     user = user_queries.create_user(data.email, password_hash)
 
     session_id = session_manager.create_session(user["id"])
-    response.set_cookie(
-        key="session_id",
-        value=session_id,
-        httponly=True,
-        samesite="lax",
-        secure=False,
-        max_age=86400,
-    )
+    _set_session_cookie(response, session_id)
 
     return UserResponse(
         id=user["id"],
@@ -45,14 +58,7 @@ async def login(data: UserLogin, response: Response):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     session_id = session_manager.create_session(user["id"])
-    response.set_cookie(
-        key="session_id",
-        value=session_id,
-        httponly=True,
-        samesite="lax",
-        secure=False,
-        max_age=86400,
-    )
+    _set_session_cookie(response, session_id)
 
     return UserResponse(
         id=user["id"],
@@ -67,7 +73,9 @@ async def logout(request: Request, response: Response):
     session_id = request.cookies.get("session_id")
     if session_id:
         session_manager.delete_session(session_id)
-    response.delete_cookie(key="session_id")
+    response.delete_cookie(
+        key="session_id", samesite=_COOKIE_SAMESITE, secure=_COOKIE_SECURE
+    )
     return {"message": "Logged out"}
 
 
