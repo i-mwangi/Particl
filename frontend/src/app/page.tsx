@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import StorySection from "@/components/StorySection";
 import HowItWorks from "@/components/HowItWorks";
+import DocTypeCarousel from "@/components/DocTypeCarousel";
 
 const PixelBlast = dynamic(() => import("@/components/PixelBlast"), { ssr: false });
 
@@ -210,6 +211,22 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Document types carousel ── */}
+      <section style={{ padding: "72px 0 40px" }}>
+        <div style={{ textAlign: "center", marginBottom: "8px", padding: "0 24px" }}>
+          <p style={{ fontSize: "13px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-deep)", marginBottom: "14px" }}>
+            Document types
+          </p>
+          <h2 style={{ fontSize: "clamp(24px,3.6vw,34px)", fontWeight: 700, color: "var(--text-primary)", marginBottom: "16px", lineHeight: 1.2 }}>
+            Whatever you need to write
+          </h2>
+          <p style={{ fontSize: "16px", lineHeight: 1.7, color: "var(--text-secondary)", maxWidth: "560px", margin: "0 auto" }}>
+            One agent, every format — each of these ships as a real compiled PDF.
+          </p>
+        </div>
+        <DocTypeCarousel />
+      </section>
+
       {/* ── Features ── */}
       <section style={{ padding: "88px 24px" }}>
         <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
@@ -237,49 +254,6 @@ export default function Home() {
 
       {/* ── Story timeline ── */}
       <StorySection />
-
-      {/* ── Document types ── */}
-      <section style={{ padding: "48px 24px 64px" }}>
-        <div style={{ maxWidth: "1060px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "36px" }}>
-            <p style={{ fontSize: "13px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-deep)", marginBottom: "14px" }}>
-              Document types
-            </p>
-            <h2 style={{ fontSize: "clamp(24px,3.6vw,34px)", fontWeight: 700, color: "var(--text-primary)", marginBottom: "16px", lineHeight: 1.2 }}>
-              Whatever you need to write
-            </h2>
-            <p style={{ fontSize: "16px", lineHeight: 1.7, color: "var(--text-secondary)", maxWidth: "560px", margin: "0 auto" }}>
-              One agent, every format — each of these ships as a real compiled PDF.
-            </p>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: "14px" }}>
-            {[
-              { t: "Specifications", d: "Numbered requirements with clean, consistent typesetting", i: <><path d="M9 11l3 3 8-8" /><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9" /></> },
-              { t: "Reports", d: "Structured reports with tables and charts built from your data", i: <><path d="M3 3v18h18" /><rect x="7" y="10" width="3" height="7" /><rect x="13" y="6" width="3" height="11" /></> },
-              { t: "Theses", d: "Chapters, citations and figures that hold together", i: <><path d="M22 10L12 5 2 10l10 5 10-5z" /><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" /></> },
-              { t: "Presentations", d: "Beamer slide decks — one idea per frame", i: <><rect x="3" y="4" width="18" height="12" rx="1" /><path d="M12 16v4M8 20h8" /></> },
-              { t: "Papers", d: "Abstract to bibliography in journal-ready form", i: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h6" /></> },
-              { t: "Lecture notes", d: "Complex equations and worked examples, typeset with ease", i: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></> },
-              { t: "Transactional documents", d: "Automate document creation through the API", i: <><path d="M16 3h5v5M8 21H3v-5" /><path d="M21 3l-7 7M3 21l7-7" /></> },
-              { t: "Books", d: "Large works organized into chapters, formatted automatically", i: <><path d="M12 6c-1.5-1.3-3.5-2-6-2H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2c2.5 0 4.5.7 6 2 1.5-1.3 3.5-2 6-2h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-2c-2.5 0-4.5.7-6 2z" /><path d="M12 6v14" /></> },
-              { t: "Curriculum Vitae", d: "Your experience as a polished one-page resume", i: <><circle cx="12" cy="8" r="3.2" /><path d="M5 20a7 7 0 0 1 14 0" /></> },
-              { t: "Letters", d: "Formal correspondence, opening to closing, in a minute", i: <><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 7l10 6 10-6" /></> },
-              { t: "Invoices", d: "Line items and totals from machine-readable data", i: <><path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 3 2 3-2 3 2 3-2V8z" /><path d="M9 9h6M9 13h6" /></> },
-              { t: "Proposals", d: "Structured proposals with budgets and timelines", i: <><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.6 6.5 19.5l1-6.3L3 8.9 9 8z" /></> },
-            ].map((x) => (
-              <div key={x.t} className="soft-card" style={{ padding: "18px", display: "flex", gap: "13px", alignItems: "flex-start" }}>
-                <div style={{ width: "36px", height: "36px", borderRadius: "9px", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{x.i}</svg>
-                </div>
-                <div>
-                  <h3 style={{ fontSize: "14.5px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "4px" }}>{x.t}</h3>
-                  <p style={{ fontSize: "12.5px", lineHeight: 1.55, color: "var(--text-secondary)" }}>{x.d}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Visualizations showcase ── */}
       <section style={{ padding: "48px 24px 80px" }}>
