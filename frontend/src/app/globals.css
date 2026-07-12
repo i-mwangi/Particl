@@ -238,6 +238,38 @@ code, pre, .mono {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Dotted tick icon chip (dots twinkle on hover) ── */
+.dot-tick-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05), 0 6px 18px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+.dot-tick-chip circle {
+  transform-origin: center;
+  transform-box: fill-box;
+}
+.dot-tick-chip:hover circle,
+.soft-card:hover .dot-tick-chip circle,
+.ld-story-icon:hover circle {
+  animation: dot-twinkle 0.9s ease-in-out infinite;
+}
+.dot-tick-chip circle:nth-of-type(1) { animation-delay: 0ms; }
+.dot-tick-chip circle:nth-of-type(2) { animation-delay: 110ms; }
+.dot-tick-chip circle:nth-of-type(3) { animation-delay: 220ms; }
+.dot-tick-chip circle:nth-of-type(4) { animation-delay: 330ms; }
+.dot-tick-chip circle:nth-of-type(5) { animation-delay: 440ms; }
+.dot-tick-chip circle:nth-of-type(6) { animation-delay: 550ms; }
+.dot-tick-chip circle:nth-of-type(7) { animation-delay: 660ms; }
+@keyframes dot-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(0.5); }
+}
+
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 8px var(--accent-glow); }
   50% { box-shadow: 0 0 20px var(--accent-glow); }
