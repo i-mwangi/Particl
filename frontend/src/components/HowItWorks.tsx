@@ -38,7 +38,7 @@ const EXAMPLES = [
 function Arrow({ color }: { color: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 2px" }}>
-      <svg width="52" height="52" viewBox="0 0 24 24" fill={color} style={{ transition: "fill 0.4s ease", flexShrink: 0 }}>
+      <svg width="74" height="74" viewBox="0 0 24 24" fill={color} style={{ transition: "fill 0.4s ease", flexShrink: 0 }}>
         <path d="M4 9h8V5l8 7-8 7v-4H4z" />
       </svg>
     </div>
@@ -58,26 +58,26 @@ export default function HowItWorks() {
   return (
     <div style={{ maxWidth: "1240px", margin: "0 auto" }}>
       {/* Column captions */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 56px 1fr 56px 1fr", gap: "16px", marginBottom: "28px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 74px 1fr 74px 1fr", gap: "16px", marginBottom: "28px" }}>
         {[
-          <span key="a"><strong>Describe it</strong> in plain English — no LaTeX required.</span>,
+          <span key="a"><strong className="px-font">Describe it</strong> in plain English — no LaTeX required.</span>,
           <span key="s1" />,
-          <span key="b"><strong>The agent writes</strong> the LaTeX, compiles it, and fixes its own errors.</span>,
+          <span key="b"><strong className="px-font">The agent writes</strong> the LaTeX, compiles it, and fixes its own errors.</span>,
           <span key="s2" />,
-          <span key="c"><strong>Download</strong> a finished, vector-sharp PDF.</span>,
+          <span key="c"><strong className="px-font">Download</strong> a finished, vector-sharp PDF.</span>,
         ].map((c, i) => (
-          <p key={i} style={{ fontSize: "15.5px", lineHeight: 1.6, color: "var(--text-secondary)" }}>{c}</p>
+          <p key={i} style={{ fontSize: "16px", lineHeight: 1.65, color: "var(--text-secondary)" }}>{c}</p>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 56px 1fr 56px 1fr", gap: "16px", alignItems: "center" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 74px 1fr 74px 1fr", gap: "16px", alignItems: "center" }}>
         {/* Prompt card */}
         <div className="soft-card" style={{ padding: 0, overflow: "hidden", alignSelf: "stretch", display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "11px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
             <span style={{ width: "9px", height: "9px", borderRadius: "50%", background: ex.accent, transition: "background 0.4s ease" }} />
             <span className="mono" style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>prompt</span>
           </div>
-          <p key={ex.id} className="mono" style={{ padding: "22px", fontSize: "14.5px", lineHeight: 1.85, color: "var(--text-primary)", animation: "fadeUp 0.45s ease", margin: 0, flex: 1 }}>
+          <p key={ex.id} className="mono" style={{ padding: "26px", fontSize: "16px", lineHeight: 1.9, color: "var(--text-primary)", animation: "fadeUp 0.45s ease", margin: 0, flex: 1 }}>
             &quot;{ex.prompt}&quot;
           </p>
         </div>
@@ -125,8 +125,8 @@ export default function HowItWorks() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "28px",
-            minHeight: "480px",
+            padding: "14px",
+            minHeight: "500px",
           }}
         >
           <img
@@ -134,9 +134,7 @@ export default function HowItWorks() {
             src={ex.img}
             alt={`Compiled PDF page: ${ex.label}`}
             style={{
-              maxWidth: "100%",
-              maxHeight: "430px",
-              width: "auto",
+              width: "92%",
               height: "auto",
               display: "block",
               background: "#fff",
