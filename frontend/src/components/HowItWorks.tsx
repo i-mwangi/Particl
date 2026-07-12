@@ -35,10 +35,25 @@ const EXAMPLES = [
   },
 ];
 
-function Arrow({ color }: { color: string }) {
+/** Arrow that slides vertically to point at the active card.
+ *  Card i center (3 equal cards, 18px gaps): (100%-36px)/3*i + 18px*i + (100%-36px)/6 */
+function ArrowTrack({ color, active }: { color: string; active: number }) {
+  const top = `calc(((100% - 36px) / 3) * ${active} + ${active * 18}px + (100% - 36px) / 6)`;
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 2px" }}>
-      <svg width="74" height="74" viewBox="0 0 24 24" fill={color} style={{ transition: "fill 0.4s ease", flexShrink: 0 }}>
+    <div style={{ position: "relative", alignSelf: "stretch" }}>
+      <svg
+        width="74"
+        height="74"
+        viewBox="0 0 24 24"
+        fill={color}
+        style={{
+          position: "absolute",
+          left: "50%",
+          top,
+          transform: "translate(-50%, -50%)",
+          transition: "top 0.45s ease, fill 0.4s ease",
+        }}
+      >
         <path d="M4 9h8V5l8 7-8 7v-4H4z" />
       </svg>
     </div>
@@ -58,19 +73,17 @@ export default function HowItWorks() {
   return (
     <div style={{ maxWidth: "1240px", margin: "0 auto" }}>
       {/* Column captions */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 74px 1fr 74px 1fr", gap: "16px", marginBottom: "28px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.45fr 1fr", gap: "16px", marginBottom: "28px" }}>
         {[
           <span key="a"><strong className="px-font">Describe it</strong> in plain English — no LaTeX required.</span>,
-          <span key="s1" />,
-          <span key="b"><strong className="px-font">The agent writes</strong> the LaTeX, compiles it, and fixes its own errors.</span>,
-          <span key="s2" />,
+          <span key="b" style={{ display: "block", padding: "0 90px" }}><strong className="px-font">The agent writes</strong> the LaTeX, compiles it, and fixes its own errors.</span>,
           <span key="c"><strong className="px-font">Download</strong> a finished, vector-sharp PDF.</span>,
         ].map((c, i) => (
           <p key={i} style={{ fontSize: "16px", lineHeight: 1.65, color: "var(--text-secondary)" }}>{c}</p>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 74px 1fr 74px 1fr", gap: "16px", alignItems: "center" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.45fr 1fr", gap: "16px", alignItems: "center" }}>
         {/* Prompt card */}
         <div className="soft-card" style={{ padding: 0, overflow: "hidden", alignSelf: "stretch", display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "11px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
@@ -82,7 +95,9 @@ export default function HowItWorks() {
           </p>
         </div>
 
-        <Arrow color={ex.accent} />
+        {/* Arrows + document type cards share one band so the arrows track the active card */}
+        <div style={{ display: "grid", gridTemplateColumns: "74px 1fr 74px", gap: "16px", alignItems: "stretch" }}>
+        <ArrowTrack color={ex.accent} active={active} />
 
         {/* Document type cards */}
         <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
@@ -113,7 +128,8 @@ export default function HowItWorks() {
           })}
         </div>
 
-        <Arrow color={ex.accent} />
+        <ArrowTrack color={ex.accent} active={active} />
+        </div>
 
         {/* Compiled page */}
         <div
