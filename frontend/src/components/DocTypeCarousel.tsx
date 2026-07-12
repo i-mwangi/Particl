@@ -127,7 +127,7 @@ export default function DocTypeCarousel() {
             className="soft-card"
             style={{ padding: "16px 22px", maxWidth: "340px", textAlign: "left" }}
           >
-            <p style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>{active.t}</p>
+            <p className="px-font" style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "5px" }}>{active.t}</p>
             <p style={{ fontSize: "13.5px", lineHeight: 1.6, color: "var(--text-secondary)" }}>{active.d}</p>
           </div>
         </div>
