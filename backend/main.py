@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -7,7 +9,11 @@ from auth.routes import router as auth_router
 
 app = FastAPI()
 
-ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:3001"]
+# Local dev origins are always allowed. Add the deployed frontend by setting
+# FRONTEND_ORIGIN (comma-separated for more than one, e.g. a preview + prod URL).
+ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:3001"] + [
+    o.strip() for o in os.getenv("FRONTEND_ORIGIN", "").split(",") if o.strip()
+]
 
 app.add_middleware(
     CORSMiddleware,
