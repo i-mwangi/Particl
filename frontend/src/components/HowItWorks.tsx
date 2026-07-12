@@ -35,26 +35,56 @@ const EXAMPLES = [
   },
 ];
 
-/** Arrow that slides vertically to point at the active card.
+// Dots tracing a right-pointing arrow in a 24x24 viewBox
+const ARROW_DOTS: [number, number][] = [
+  // top of shaft
+  [4, 9], [6.7, 9], [9.3, 9], [12, 9],
+  // up to arrowhead top
+  [12, 7], [12, 5],
+  // upper diagonal to the tip
+  [14, 6.75], [16, 8.5], [18, 10.25], [20, 12],
+  // lower diagonal from the tip
+  [18, 13.75], [16, 15.5], [14, 17.25], [12, 19],
+  // up to shaft bottom
+  [12, 17], [12, 15],
+  // bottom of shaft
+  [9.3, 15], [6.7, 15], [4, 15],
+  // left edge
+  [4, 13], [4, 11],
+];
+
+/** Dotted arrow that slides vertically to point at the active card.
  *  Card i center (3 equal cards, 18px gaps): (100%-36px)/3*i + 18px*i + (100%-36px)/6 */
 function ArrowTrack({ color, active }: { color: string; active: number }) {
   const top = `calc(((100% - 36px) / 3) * ${active} + ${active * 18}px + (100% - 36px) / 6)`;
   return (
     <div style={{ position: "relative", alignSelf: "stretch" }}>
       <svg
+        className="dot-arrow"
         width="74"
         height="74"
         viewBox="0 0 24 24"
-        fill={color}
         style={{
           position: "absolute",
           left: "50%",
           top,
           transform: "translate(-50%, -50%)",
-          transition: "top 0.45s ease, fill 0.4s ease",
+          transition: "top 0.45s ease",
         }}
       >
-        <path d="M4 9h8V5l8 7-8 7v-4H4z" />
+        {ARROW_DOTS.map(([cx, cy], i) => (
+          <circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r="1.15"
+            fill={color}
+            style={{
+              transition: "fill 0.4s ease",
+              animationDelay: `${(i * 80) % 720}ms`,
+            }}
+          />
+        ))}
       </svg>
     </div>
   );

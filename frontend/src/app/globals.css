@@ -258,6 +258,14 @@ code, pre, .mono {
 .ld-story-icon:hover circle {
   animation: dot-twinkle 0.9s ease-in-out infinite;
 }
+/* Dotted arrow (HowItWorks strip): twinkle on hover */
+.dot-arrow circle {
+  transform-origin: center;
+  transform-box: fill-box;
+}
+.dot-arrow:hover circle {
+  animation: dot-twinkle 0.9s ease-in-out infinite;
+}
 .dot-tick-chip circle:nth-of-type(1) { animation-delay: 0ms; }
 .dot-tick-chip circle:nth-of-type(2) { animation-delay: 110ms; }
 .dot-tick-chip circle:nth-of-type(3) { animation-delay: 220ms; }
