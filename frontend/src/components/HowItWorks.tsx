@@ -134,12 +134,13 @@ export default function HowItWorks() {
             src={ex.img}
             alt={`Compiled PDF page: ${ex.label}`}
             style={{
-              maxWidth: "95%",
-              maxHeight: "475px",
-              width: "auto",
-              height: "auto",
+              width: "95%",
+              height: "475px",
+              objectFit: "contain",
               display: "block",
               background: "#fff",
+              padding: "10px 0",
+              boxSizing: "border-box",
               boxShadow: "0 12px 36px rgba(0,0,0,0.2)",
               borderRadius: "3px",
               animation: "fadeUp 0.45s ease",
