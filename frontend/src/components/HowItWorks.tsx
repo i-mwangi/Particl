@@ -135,11 +135,12 @@ export default function HowItWorks() {
             alt={`Compiled PDF page: ${ex.label}`}
             style={{
               width: "95%",
-              height: "475px",
+              aspectRatio: "1275 / 1650",
+              height: "auto",
               objectFit: "contain",
               display: "block",
               background: "#fff",
-              padding: "10px 0",
+              padding: "8px 0",
               boxSizing: "border-box",
               boxShadow: "0 12px 36px rgba(0,0,0,0.2)",
               borderRadius: "3px",
