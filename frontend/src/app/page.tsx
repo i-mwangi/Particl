@@ -283,7 +283,7 @@ export default function Home() {
 
       {/* ── Visualizations showcase ── */}
       <section style={{ padding: "48px 24px 80px" }}>
-        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        <div style={{ maxWidth: "1240px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "36px" }}>
             <p style={{ fontSize: "13px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-deep)", marginBottom: "14px" }}>
               Visualizations
