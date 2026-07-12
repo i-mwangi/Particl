@@ -25,9 +25,10 @@ const HOLD_MS = 6000; // pause on each item before gliding on
 const GLIDE_MS = 900;
 
 export default function DocTypeCarousel() {
-  // pos runs 0..2N-1 over a doubled list; when it reaches N we snap back
-  // (without transition) to the equivalent position in the first copy.
-  const [pos, setPos] = useState(0);
+  // The list is TRIPLED and pos lives in the middle copy [N, 2N), so icons
+  // always extend past both edges of the viewport - including on first paint.
+  // After gliding into the third copy we snap back a full cycle, invisibly.
+  const [pos, setPos] = useState(N);
   const [animate, setAnimate] = useState(true);
   const snapTimer = useRef<number | null>(null);
 
@@ -38,9 +39,9 @@ export default function DocTypeCarousel() {
     return () => clearInterval(t);
   }, []);
 
-  // After gliding onto the second copy, snap back invisibly
+  // After gliding past the middle copy, snap back invisibly
   useEffect(() => {
-    if (pos < N) return;
+    if (pos < 2 * N) return;
     snapTimer.current = window.setTimeout(() => {
       setAnimate(false);
       setPos(pos - N);
@@ -51,7 +52,7 @@ export default function DocTypeCarousel() {
     };
   }, [pos]);
 
-  const items = [...TYPES, ...TYPES];
+  const items = [...TYPES, ...TYPES, ...TYPES];
   const activeIdx = pos % N;
   const active = TYPES[activeIdx];
 
