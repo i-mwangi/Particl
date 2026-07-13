@@ -528,6 +528,13 @@ code, pre, .mono {
   }
   /* Redundant next to the logo icon; drop it to save width. */
   .editor-toolbar .brand-word { display: none !important; }
+  /* Icon-only toolbar buttons so everything fits on ONE row, not three. */
+  .editor-toolbar .tb-label { display: none !important; }
+  .editor-toolbar .compile-button { padding: 8px 12px !important; }
+
+  /* Monaco minimap (the tiny-text strip on the right) is pure clutter on a phone. */
+  .monaco-editor .minimap,
+  .monaco-editor .minimap-decorations-layer { display: none !important; }
   /* Keep Compile in the toolbar - the old fixed FAB left an empty card behind. */
   .compile-button {
     position: static !important;

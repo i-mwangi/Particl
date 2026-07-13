@@ -808,8 +808,9 @@ export default function EditorPage() {
                 cursor: "pointer",
               }}
             >
-              Export
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+              <span className="tb-label">Export</span>
+              <svg className="tb-label" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
             </button>
             {exportOpen && (
               <div style={{
@@ -915,7 +916,7 @@ export default function EditorPage() {
             ) : (
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={!latexCode.trim() ? "var(--text-muted)" : "#fff"} strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
             )}
-            <span style={{
+            <span className="tb-label" style={{
               fontSize: "12px",
               fontWeight: 600,
               color: !latexCode.trim() || status === "compiling" || isStreaming ? "var(--text-muted)" : "#fff",
@@ -942,8 +943,8 @@ export default function EditorPage() {
               }}
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-              Files
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+              <span className="tb-label">Files</span>
+              <svg className="tb-label" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
             </button>
             {filesOpen && (
               <div style={{
