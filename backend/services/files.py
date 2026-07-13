@@ -14,8 +14,12 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 MAX_SAMPLE_ROWS = 20
 MAX_UNIQUE_VALUES = 10
 
-ALLOWED_EXTENSIONS = {".csv", ".png", ".jpg", ".jpeg"}
+ALLOWED_EXTENSIONS = {".csv", ".png", ".jpg", ".jpeg", ".pdf"}
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
+PDF_EXTENSIONS = {".pdf"}
+
+# How much extracted paper text to keep as LLM context (~4k tokens).
+MAX_PAPER_CHARS = 16000
 
 # Image bytes live on local disk (the compiler runs on the same machine);
 # only the small metadata summary goes to Redis.
@@ -113,6 +117,49 @@ def parse_image(user_id: str, filename: str, content: bytes) -> dict:
     }
 
 
+def parse_pdf(filename: str, content: bytes) -> dict:
+    """Extract text from an uploaded reference paper (PDF) for LLM context."""
+    if len(content) > MAX_FILE_SIZE:
+        raise FileValidationError(
+            f"File too large ({len(content)} bytes > {MAX_FILE_SIZE} bytes)"
+        )
+    if content[:5] != b"%PDF-":
+        raise FileValidationError("File is not a valid PDF")
+
+    try:
+        from pypdf import PdfReader
+
+        reader = PdfReader(io.BytesIO(content))
+        pages = []
+        for page in reader.pages:
+            pages.append(page.extract_text() or "")
+            if sum(len(p) for p in pages) > MAX_PAPER_CHARS:
+                break
+        text = "\n".join(pages).strip()
+    except Exception as e:
+        raise FileValidationError(f"Could not read PDF: {e}")
+
+    if not text:
+        raise FileValidationError(
+            "No selectable text found in the PDF (it may be a scanned image)."
+        )
+
+    # Collapse runaway whitespace and cap the length.
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    truncated = len(text) > MAX_PAPER_CHARS
+    text = text[:MAX_PAPER_CHARS]
+
+    return {
+        "kind": "paper",
+        "filename": os.path.basename(filename or "paper.pdf"),
+        "page_count": len(reader.pages),
+        "char_count": len(text),
+        "truncated": truncated,
+        "text": text,
+    }
+
+
 def get_image_paths(user_id: str, file_ids: list) -> list:
     """(latex_filename, disk_path) pairs for attached images that still exist."""
     pairs = []
@@ -143,10 +190,21 @@ def get_file_summary(user_id: str, file_id: str) -> Optional[dict]:
     return json.loads(raw) if raw else None
 
 
+def get_papers(user_id: str, file_ids: list) -> list:
+    """Return (filename, text) for uploaded reference papers still in cache."""
+    papers = []
+    for file_id in file_ids or []:
+        summary = get_file_summary(user_id, file_id)
+        if summary and summary.get("kind") == "paper" and summary.get("text"):
+            papers.append((summary["filename"], summary["text"]))
+    return papers
+
+
 def build_data_context(user_id: str, file_ids: list) -> str:
     """Build the prompt block describing uploaded data files."""
     blocks = []
     image_names = []
+    paper_blocks = []
     for file_id in file_ids:
         summary = get_file_summary(user_id, file_id)
         if not summary:
@@ -154,6 +212,15 @@ def build_data_context(user_id: str, file_ids: list) -> str:
 
         if summary.get("kind") == "image":
             image_names.append(summary["filename"])
+            continue
+
+        if summary.get("kind") == "paper":
+            note = " (truncated)" if summary.get("truncated") else ""
+            paper_blocks.append(
+                f"### Reference paper: {summary['filename']}"
+                f" ({summary.get('page_count', '?')} pages){note}\n"
+                f"{summary['text']}"
+            )
             continue
 
         lines = [
@@ -179,6 +246,15 @@ def build_data_context(user_id: str, file_ids: list) -> str:
         blocks.append("\n".join(lines))
 
     parts = []
+    if paper_blocks:
+        parts.append(
+            "\n\nThe user attached the following reference paper(s). Use them to ground "
+            "the document in the real research: draw on their definitions, methods, "
+            "findings and terminology, and cite them where appropriate. Do NOT copy "
+            "sentences verbatim - paraphrase and synthesize in the user's own document.\n\n"
+            + "\n\n".join(paper_blocks)
+        )
+
     if image_names:
         names = ", ".join(image_names)
         parts.append(

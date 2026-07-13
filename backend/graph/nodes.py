@@ -256,6 +256,45 @@ _FIX_SYSTEM = (
 )
 
 
+# Review agent: reads a draft (and any attached reference papers) and returns
+# concrete, academic-quality suggestions - not a rewrite.
+_REVIEW_SYSTEM = (
+    "You are a meticulous academic writing reviewer for LaTeX documents - the kind\n"
+    "of feedback a careful advisor or journal reviewer gives. You are given the\n"
+    "current LaTeX source (and possibly reference papers the author attached).\n"
+    "Return a critique as STRICT JSON - nothing else, no prose, no markdown fences.\n\n"
+    "Schema:\n"
+    "{\n"
+    '  \"summary\": \"one or two sentences on the draft\'s overall state\",\n'
+    '  \"suggestions\": [\n'
+    "    {\n"
+    '      \"category\": \"structure|citations|math|clarity|rigor|formatting|completeness\",\n'
+    '      \"severity\": \"high|medium|low\",\n'
+    '      \"title\": \"short actionable heading\",\n'
+    '      \"detail\": \"specific, concrete explanation of the issue and how to fix it\",\n'
+    '      \"location\": \"where it applies (e.g. section name or \\\\label), or empty\"\n'
+    "    }\n"
+    "  ]\n"
+    "}\n\n"
+    "WHAT TO LOOK FOR (be specific, cite the actual content):\n"
+    "- STRUCTURE: missing abstract/intro/conclusion, illogical section order, sections\n"
+    "  that are stubs, no signposting.\n"
+    "- CITATIONS: claims that need a reference but have none; if reference papers are\n"
+    "  attached, point out where their findings should be cited; unsupported assertions.\n"
+    "- MATH: undefined symbols, equations introduced without explanation, missing units,\n"
+    "  notation used before it is defined.\n"
+    "- CLARITY: vague or hand-wavy sentences, undefined jargon, weak topic sentences,\n"
+    "  an abstract that does not state contribution/result.\n"
+    "- RIGOR: overclaiming, missing limitations, results stated without method.\n"
+    "- COMPLETENESS: TODO/placeholder text, empty figures, referenced-but-absent labels.\n\n"
+    "RULES:\n"
+    "- Ground every suggestion in the ACTUAL text - quote or name the specific part.\n"
+    "- 4 to 9 suggestions, ordered most important first. Quality over quantity.\n"
+    "- Be constructive and concrete: say exactly what to add or change.\n"
+    "- Do NOT rewrite the document. Do NOT output LaTeX. Output ONLY the JSON object."
+)
+
+
 def _clean(text: str) -> str:
     """Enhanced text cleaning with robust sanitization."""
     # Remove code fences

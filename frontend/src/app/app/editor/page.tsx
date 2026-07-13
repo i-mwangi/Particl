@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { api, AgentEvent, UploadedFile } from "@/lib/api";
+import { api, AgentEvent, UploadedFile, ReviewResult } from "@/lib/api";
 
 // pdf.js touches browser globals — render client-side only
 const PdfViewer = dynamic(() => import("@/components/PdfViewer"), { ssr: false });
@@ -63,6 +63,28 @@ export default function EditorPage() {
   const [codeVisible, setCodeVisible] = useState(true);
   const [splitPct, setSplitPct] = useState(50);
   const splitRef = useRef<HTMLDivElement>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
+  const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null);
+
+  const runReview = async () => {
+    if (!latexCode.trim() || reviewing) return;
+    setReviewing(true);
+    setReviewOpen(true);
+    setReviewResult(null);
+    try {
+      const result = await api.agent.review(
+        latexCode,
+        attachedFiles.map((f) => f.file_id)
+      );
+      setReviewResult(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Review failed");
+      setReviewOpen(false);
+    } finally {
+      setReviewing(false);
+    }
+  };
 
   const startSplitDrag = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -332,17 +354,18 @@ export default function EditorPage() {
   };
 
   const uploadFiles = async (files: FileList | File[]) => {
-    const csvFiles = Array.from(files).filter((f) =>
-      f.name.toLowerCase().endsWith(".csv")
+    const allowed = [".csv", ".png", ".jpg", ".jpeg", ".pdf"];
+    const okFiles = Array.from(files).filter((f) =>
+      allowed.some((ext) => f.name.toLowerCase().endsWith(ext))
     );
-    if (csvFiles.length === 0) {
-      setError("Only .csv files are supported as data attachments");
+    if (okFiles.length === 0) {
+      setError("Attach a .csv (data), an image, or a .pdf reference paper");
       return;
     }
     setIsUploading(true);
     setError("");
     try {
-      for (const file of csvFiles) {
+      for (const file of okFiles) {
         const uploaded = await api.files.upload(file);
         setAttachedFiles((prev) => [...prev, uploaded]);
       }
@@ -691,7 +714,7 @@ export default function EditorPage() {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".csv,.png,.jpg,.jpeg"
+          accept=".csv,.png,.jpg,.jpeg,.pdf"
           multiple
           style={{ display: "none" }}
           onChange={(e) => {
@@ -923,6 +946,33 @@ export default function EditorPage() {
             }}>
               {status === "compiling" ? "Compiling..." : "Compile"}
             </span>
+          </button>
+
+          {/* Review draft */}
+          <button
+            onClick={runReview}
+            disabled={!latexCode.trim() || reviewing || isStreaming}
+            title="Review the draft for academic quality"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "7px",
+              padding: "7px 16px",
+              borderRadius: "999px",
+              border: "1px solid var(--border)",
+              background: "transparent",
+              color: !latexCode.trim() || reviewing || isStreaming ? "var(--text-muted)" : "var(--text-primary)",
+              cursor: !latexCode.trim() || reviewing || isStreaming ? "not-allowed" : "pointer",
+              fontSize: "12px",
+              fontWeight: 600,
+            }}
+          >
+            {reviewing ? (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" strokeOpacity="0.3" /><path d="M12 2a10 10 0 0 1 10 10" /></svg>
+            ) : (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+            )}
+            <span className="tb-label">{reviewing ? "Reviewing..." : "Review"}</span>
           </button>
 
           {/* Files dropdown */}
@@ -1594,6 +1644,70 @@ export default function EditorPage() {
           isBusy={isStreaming || isLiveEditing || status === "compiling"}
           onSend={(text) => startGeneration(text)}
         />
+
+        {reviewOpen && (
+          <div className="review-panel" style={{
+            position: "fixed",
+            top: "68px",
+            right: "20px",
+            width: "min(400px, 92vw)",
+            maxHeight: "calc(100vh - 100px)",
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: "14px",
+            border: "1px solid var(--border)",
+            background: "var(--bg-surface)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
+            zIndex: 95,
+            overflow: "hidden",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", flex: 1 }}>Draft review</span>
+              <button onClick={() => setReviewOpen(false)} aria-label="Close review" style={{ border: "none", background: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "16px", lineHeight: 1 }}>✕</button>
+            </div>
+            <div style={{ overflowY: "auto", padding: "14px 16px" }}>
+              {reviewing && (
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", textAlign: "center", padding: "24px 0" }}>
+                  Reading your draft{reviewResult?.reviewed_papers?.length ? " and reference papers" : ""}…
+                </p>
+              )}
+              {!reviewing && reviewResult && (
+                <>
+                  {reviewResult.summary && (
+                    <p style={{ fontSize: "13px", lineHeight: 1.6, color: "var(--text-secondary)", marginBottom: "14px", fontStyle: "italic" }}>
+                      {reviewResult.summary}
+                    </p>
+                  )}
+                  {reviewResult.reviewed_papers?.length > 0 && (
+                    <p style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "12px" }}>
+                      Grounded in: {reviewResult.reviewed_papers.join(", ")}
+                    </p>
+                  )}
+                  {reviewResult.suggestions.length === 0 && (
+                    <p style={{ fontSize: "13px", color: "var(--text-secondary)" }}>No issues found — the draft looks solid.</p>
+                  )}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {reviewResult.suggestions.map((s, i) => {
+                      const sev = s.severity === "high" ? "var(--error)" : s.severity === "medium" ? "var(--accent)" : "var(--text-muted)";
+                      return (
+                        <div key={i} style={{ borderLeft: `3px solid ${sev}`, background: "var(--bg-elevated)", borderRadius: "8px", padding: "10px 12px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                            <span style={{ fontSize: "9px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: sev }}>{s.severity}</span>
+                            <span style={{ fontSize: "9px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>· {s.category}</span>
+                          </div>
+                          <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "3px" }}>{s.title}</p>
+                          <p style={{ fontSize: "12px", lineHeight: 1.55, color: "var(--text-secondary)" }}>{s.detail}</p>
+                          {s.location && <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>↳ {s.location}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

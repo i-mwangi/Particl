@@ -273,7 +273,7 @@ export default function AppDashboard() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv,.png,.jpg,.jpeg"
+            accept=".csv,.png,.jpg,.jpeg,.pdf"
             multiple
             style={{ display: "none" }}
             onChange={(e) => {

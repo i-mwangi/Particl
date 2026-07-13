@@ -93,6 +93,8 @@ async def upload_data_file(request: Request, file: UploadFile = File(...)):
     try:
         if ext in file_service.IMAGE_EXTENSIONS:
             summary = file_service.parse_image(user_id, file.filename, content)
+        elif ext in file_service.PDF_EXTENSIONS:
+            summary = file_service.parse_pdf(file.filename, content)
         else:
             summary = file_service.parse_csv(file.filename, content)
     except file_service.FileValidationError as exc:
@@ -104,6 +106,14 @@ async def upload_data_file(request: Request, file: UploadFile = File(...)):
             "file_id": file_id,
             "filename": summary["filename"],
             "kind": "image",
+        }
+    if summary.get("kind") == "paper":
+        return {
+            "file_id": file_id,
+            "filename": summary["filename"],
+            "kind": "paper",
+            "page_count": summary["page_count"],
+            "truncated": summary["truncated"],
         }
     return {
         "file_id": file_id,
@@ -139,6 +149,53 @@ async def compile_document(request: Request, data: CompileRequest):
         return {"pdf_url": pdf_url, "success": True}
     except LatexCompilationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/v2/agent/review")
+async def review_document(request: Request, data: CompileRequest):
+    """Read the current draft (plus any attached reference papers) and return
+    concrete, academic-quality suggestions - a proactive review, not a rewrite."""
+    user_id = get_current_user(request)
+    if redis_rate.is_rate_limited(_get_client_id(request)):
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    if not data.latex or not data.latex.strip():
+        raise HTTPException(status_code=400, detail="Nothing to review yet.")
+
+    from graph.nodes import _llm, _REVIEW_SYSTEM
+    from langchain_core.messages import HumanMessage, SystemMessage
+
+    papers = file_service.get_papers(user_id, data.file_ids or [])
+    paper_context = ""
+    for name, text in papers:
+        paper_context += f"\n\n--- Reference paper: {name} ---\n{text}"
+
+    human = (
+        "Review this LaTeX document. Return ONLY the JSON critique.\n\n"
+        f"=== DOCUMENT ===\n{data.latex[:60000]}"
+    )
+    if paper_context:
+        human += (
+            "\n\n=== REFERENCE PAPERS THE AUTHOR ATTACHED ===\n"
+            "Point out where these should be cited or drawn on." + paper_context
+        )
+
+    try:
+        response = await run_in_threadpool(
+            _llm.invoke, [SystemMessage(content=_REVIEW_SYSTEM), HumanMessage(content=human)]
+        )
+        raw = str(response.content).strip()
+        # Strip any accidental markdown fences and isolate the JSON object.
+        raw = re.sub(r"^```(?:json)?|```$", "", raw, flags=re.MULTILINE).strip()
+        start, end = raw.find("{"), raw.rfind("}")
+        parsed = json.loads(raw[start : end + 1]) if start != -1 else {}
+        suggestions = parsed.get("suggestions", []) if isinstance(parsed, dict) else []
+        return {
+            "summary": parsed.get("summary", "") if isinstance(parsed, dict) else "",
+            "suggestions": suggestions,
+            "reviewed_papers": [name for name, _ in papers],
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Review failed: {exc}") from exc
 
 
 @router.post("/v2/agent")

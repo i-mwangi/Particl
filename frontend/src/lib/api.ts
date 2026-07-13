@@ -202,8 +202,30 @@ export const api = {
       });
       return res.json();
     },
+
+    review: async (latex: string, fileIds: string[] = []): Promise<ReviewResult> => {
+      const res = await fetchWithCookies("/v2/agent/review", {
+        method: "POST",
+        body: JSON.stringify({ latex, file_ids: fileIds }),
+      });
+      return res.json();
+    },
   },
 };
+
+export interface ReviewSuggestion {
+  category: string;
+  severity: "high" | "medium" | "low";
+  title: string;
+  detail: string;
+  location?: string;
+}
+
+export interface ReviewResult {
+  summary: string;
+  suggestions: ReviewSuggestion[];
+  reviewed_papers: string[];
+}
 
 export interface UploadedFile {
   file_id: string;
