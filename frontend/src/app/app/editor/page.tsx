@@ -86,6 +86,19 @@ export default function EditorPage() {
     }
   };
 
+  const [applyingIdx, setApplyingIdx] = useState<number | null>(null);
+
+  const applySuggestion = (s: ReviewResult["suggestions"][number], idx: number) => {
+    if (isStreaming || status === "compiling") return;
+    const instruction =
+      "Apply this review suggestion to the document, changing only what is needed " +
+      `to address it and preserving everything else:\n\n${s.title} — ${s.detail}` +
+      (s.location ? `\n(Location: ${s.location})` : "");
+    setApplyingIdx(idx);
+    setReviewOpen(false);
+    startGeneration(instruction).finally(() => setApplyingIdx(null));
+  };
+
   const startSplitDrag = (e: React.MouseEvent) => {
     e.preventDefault();
     const container = splitRef.current;
@@ -1699,6 +1712,27 @@ export default function EditorPage() {
                           <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "3px" }}>{s.title}</p>
                           <p style={{ fontSize: "12px", lineHeight: 1.55, color: "var(--text-secondary)" }}>{s.detail}</p>
                           {s.location && <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>↳ {s.location}</p>}
+                          <button
+                            onClick={() => applySuggestion(s, i)}
+                            disabled={isStreaming || status === "compiling"}
+                            style={{
+                              marginTop: "8px",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "5px",
+                              padding: "5px 12px",
+                              borderRadius: "999px",
+                              border: "none",
+                              background: isStreaming || status === "compiling" ? "var(--bg-hover)" : "var(--accent)",
+                              color: isStreaming || status === "compiling" ? "var(--text-muted)" : "#fff",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              cursor: isStreaming || status === "compiling" ? "not-allowed" : "pointer",
+                            }}
+                          >
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></svg>
+                            {applyingIdx === i ? "Applying..." : "Apply with agent"}
+                          </button>
                         </div>
                       );
                     })}
