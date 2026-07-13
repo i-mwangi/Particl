@@ -282,6 +282,15 @@ code, pre, .mono {
      desktop layout; once the strip stacks vertically they point at nothing. */
   .hiw-arrow { display: none !important; }
 
+  /* Hero code overlay: the frosted glass is too see-through on a small panel,
+     so the code behind bleeds into the message. Make it a solid dark card. */
+  .frosted {
+    background: rgba(22, 15, 4, 0.88) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    backdrop-filter: blur(4px) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+  }
+
   /* Agent panel: a floating card covers the whole editor on a phone.
      Turn it into a full-width bottom sheet so the document stays visible. */
   .agent-panel {
