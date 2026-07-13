@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 <img src="frontend/public/logo.png" alt="Particl" width="72" />
 
@@ -227,7 +227,3 @@ Particl/
 ## License
 
 MIT — see [LICENSE](LICENSE).
-
-## Acknowledgments
-
-Built on [Qwen](https://www.alibabacloud.com/en/product/modelstudio) (Alibaba Cloud Model Studio), [Supabase](https://supabase.com), [Upstash](https://upstash.com), [FastAPI](https://fastapi.tiangolo.com/), [Next.js](https://nextjs.org/), and [LangGraph](https://langchain-ai.github.io/langgraph/).

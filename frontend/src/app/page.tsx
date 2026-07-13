@@ -188,9 +188,9 @@ export default function Home() {
               <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#e5679b" }} />
               <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#e0b341" }} />
               <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#6fbf73" }} />
-              <span style={{ marginLeft: "12px", fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}>document.tex</span>
+              <span style={{ marginLeft: "12px", fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}>main.tex</span>
             </div>
-            <div style={{ padding: "26px", textAlign: "left", background: "linear-gradient(160deg, #2b2417, #191309)" }}>
+            <div style={{ padding: "26px", textAlign: "left", background: "linear-gradient(160deg, #150e03, #160f03)" }}>
               <pre style={{ fontSize: "13px", lineHeight: 1.9, whiteSpace: "pre-wrap", fontFamily: "'JetBrains Mono', monospace", color: "#e6dcc6" }}>
                 <span style={{ color: "#c9a86f" }}>% Describe your document</span>{"\n"}
                 <span style={{ color: "#d8b57e" }}>\documentclass</span>{"{article}"}{"\n\n"}
