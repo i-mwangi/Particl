@@ -105,7 +105,11 @@ LATEX_ENGINES = ["pdflatex", "xelatex", "lualatex"]
 
 # Configuration constants
 MAX_COMPILATION_TIME = 120  # 2 minutes timeout
-MAX_MEMORY_MB = 2048  # 2GB memory limit
+# Cap a runaway pdflatex BELOW the container's total RAM. If it is set higher
+# than the host has, the OS OOM-killer takes down the whole container (auth and
+# all) instead of this guard failing one compile that the fix loop can retry.
+# Tune per plan: Azure B1 (1.75GB) -> ~1100, B2 (3.5GB) -> ~2048.
+MAX_MEMORY_MB = int(os.getenv("LATEX_MAX_MEMORY_MB", "2048"))
 MAX_LATEX_SIZE = 500_000  # 500KB max input size
 PROCESS_CHECK_INTERVAL = 1  # Check process every second
 
