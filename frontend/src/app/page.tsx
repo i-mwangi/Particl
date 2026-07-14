@@ -263,64 +263,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Research companion ── */}
-      <section style={{ padding: "48px 24px 64px" }}>
-        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "40px" }}>
-            <p style={{ fontSize: "13px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-deep)", marginBottom: "14px" }}>
-              For researchers
-            </p>
-            <h2 style={{ fontSize: "clamp(24px,3.6vw,34px)", fontWeight: 700, color: "var(--text-primary)", marginBottom: "16px", lineHeight: 1.2 }}>
-              A companion that understands your research
-            </h2>
-            <p style={{ fontSize: "17px", lineHeight: 1.7, color: "var(--text-secondary)", maxWidth: "620px", margin: "0 auto" }}>
-              More than a formatter. Particl streamlines document structure, gets the
-              mathematics right, and offers contextual suggestions to elevate the
-              quality of your academic drafts.
-            </p>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "22px" }}>
-            {[
-              {
-                title: "Grounded in your papers",
-                body: "Attach a reference PDF and the agent reads it — drawing on its real definitions, methods and findings, and citing it where it belongs.",
-                icon: (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><path d="M9 13h6M9 17h4" />
-                  </svg>
-                ),
-              },
-              {
-                title: "Accurate mathematics",
-                body: "Numbered equations, matrices and aligned derivations, typeset correctly in proper math mode — the syntax researchers actually need.",
-                icon: (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4h7l-4 16M13 8h7M13 14h7M13 20h5" />
-                  </svg>
-                ),
-              },
-              {
-                title: "Contextual review",
-                body: "One click critiques your draft — missing citations, weak sections, math slips, unsupported claims — as ranked suggestions you can apply with the agent.",
-                icon: (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                  </svg>
-                ),
-              },
-            ].map((c) => (
-              <div key={c.title} className="soft-card" style={{ padding: "26px" }}>
-                <div style={{ width: "46px", height: "46px", borderRadius: "12px", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
-                  {c.icon}
-                </div>
-                <h3 style={{ fontSize: "17px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "9px" }}>{c.title}</h3>
-                <p style={{ fontSize: "14px", lineHeight: 1.65, color: "var(--text-secondary)" }}>{c.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── The Vision ── */}
       <section style={{ padding: "40px 24px 72px" }}>
         <div style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center" }}>
