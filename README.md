@@ -207,10 +207,25 @@ Particl/
 
 ## Deployment
 
-- **Backend**: any container host (Railway, Render, ECS). The image must include TeX Live (`texlive-latex-base texlive-fonts-recommended texlive-latex-extra`). Run `uvicorn main:app --host 0.0.0.0` behind HTTPS, with all env vars set.
-- **Frontend**: Vercel. Set `NEXT_PUBLIC_API_URL` to the deployed backend URL.
-- **Database**: run `backend/db/schema.sql` in Supabase; create a public-read `pdfs` storage bucket.
-- **Security**: strong `JWT_SECRET`, CORS restricted to your frontend origin, `rediss://` URLs for Redis in production.
+**Live production setup:**
+
+- **Frontend** → **Vercel** (`particl-rho.vercel.app`). Root directory `frontend`; set `NEXT_PUBLIC_API_URL` to the backend URL (baked in at build time — redeploy after changing it).
+- **Backend** → **Azure App Service** (Linux container, B2 plan). The image (FastAPI + TeX Live, see `backend/Dockerfile`) is built by **GitHub Actions** on every `backend/**` change and pushed to the **GitHub Container Registry** (`ghcr.io/i-mwangi/particl-backend`); App Service pulls it. Secrets and runtime config (`FRONTEND_ORIGIN`, `COOKIE_SAMESITE=none`, `COOKIE_SECURE=true`, `LATEX_MAX_MEMORY_MB`) are set as Azure app settings.
+- **Database & storage** → **Supabase**: run `backend/db/schema.sql` once; create a public-read `pdfs` storage bucket.
+- **Sessions & rate limiting** → **Upstash Redis**.
+
+> **Why a container, not serverless:** the backend spawns `pdflatex` and streams
+> long generations, so it needs a real runtime with TeX Live installed and no hard
+> request timeout — Vercel/Lambda-style functions can't host it. Size the plan
+> above the LaTeX memory cap (B2 = 3.5 GB comfortably covers `LATEX_MAX_MEMORY_MB=2048`).
+
+**Portable alternative:** the backend is host-agnostic — any container host
+(Railway, Render, Fly, ECS) works as long as the image includes TeX Live and it
+runs `uvicorn main:app --host 0.0.0.0` behind HTTPS with the env vars set.
+
+**Security:** strong `JWT_SECRET`, `FRONTEND_ORIGIN` restricting CORS to your
+frontend, `SameSite=None; Secure` cookies for the cross-domain setup, and
+`rediss://` URLs for Redis in production.
 
 ## Troubleshooting
 
