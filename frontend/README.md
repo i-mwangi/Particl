@@ -1,182 +1,119 @@
-# Frontend Documentation
+# Particl Frontend
 
-Next.js-based frontend for Particl AI-powered LaTeX editor.
+Next.js (App Router) client for Particl — the interface where you describe a
+document, watch the LaTeX stream in, see the PDF compile beside it, refine by
+conversation, and **review** the draft for academic quality.
 
-## Project Structure
+## Stack
+
+- **Next.js (App Router)** + TypeScript
+- **Monaco** editor for LaTeX, **react-pdf** for the live PDF preview
+- Session cookies via a small typed API client (`src/lib/api.ts`)
+- Theme via CSS variables (paper/light aesthetic); brand font **Pixelify Sans**
+
+## Structure
 
 ```
-frontend/
-├── src/
+frontend/src/
+├── app/
+│   ├── page.tsx           # Landing page
+│   ├── layout.tsx         # Root layout + AuthProvider
+│   ├── globals.css        # Theme variables, animations, responsive rules
+│   ├── login/ register/   # Auth pages
+│   ├── onboarding/        # Four-step first-run onboarding
 │   ├── app/
-│   │   ├── layout.tsx          # Root layout with providers
-│   │   ├── page.tsx            # Landing page
-│   │   ├── globals.css         # Global styles
-│   │   ├── login/
-│   │   │   └── page.tsx        # Login page
-│   │   ├── register/
-│   │   │   └── page.tsx        # Registration page
-│   │   └── app/
-│   │       ├── layout.tsx      # App layout with header
-│   │       └── editor/
-│   │           └── page.tsx    # Main editor page
-│   ├── components/
-│   │   └── Sidebar.tsx        # Sidebar navigation
-│   └── lib/
-│       ├── api.ts              # API client
-│       └── auth.tsx            # Auth context provider
-└── public/
-    └── favicon.svg             # Site favicon
+│   │   ├── page.tsx       # Dashboard (new project, uploads, recent projects)
+│   │   └── editor/        # Main editor (generate / edit / compile / review)
+│   └── about/ contact/ terms/ privacy/
+├── components/            # See table below
+└── lib/
+    ├── api.ts             # Typed API client
+    ├── auth.tsx           # AuthProvider context
+    └── session-storage.ts # Session/hand-off helpers
 ```
 
-## Pages
-
-### Landing Page (`/`)
-
-Public landing page with:
-- Hero section with product description
-- Features grid (6 features)
-- How it works section (3 steps)
-- Call to action
-- Professional footer with links
-
-### About (`/about`)
-
-Company/product information page with:
-- Problem statement
-- Solution explanation
-- Key features list
-- Target audience
-
-### Contact (`/contact`)
-
-Contact form with:
-- Name, email, subject, message fields
-- Form validation
-- Success/error states
-- Email to: quantumbyte.co.in@gmail.com
-- Alternative: direct mailto link
-
-### Login (`/login`)
-
-Authentication form with:
-- Email/password fields
-- Error handling
-- Link to registration
-
-### Register (`/register`)
-
-Registration form with:
-- Email/password fields
-- Password validation (min 6 characters)
-- Error handling
-- Link to login
-
-### Editor (`/app/editor`)
-
-Main application interface featuring:
-- Split-pane layout (50/50)
-- Left: LaTeX code editor with streaming
-- Right: PDF preview
-- Floating Compile button
-- Status bar showing generation progress
-- Session history sidebar
-
-### Terms (`/terms`)
-
-Legal terms of service page with:
-- Acceptance of terms
-- Use of service guidelines
-- Account responsibility
-- Intellectual property policy
-
-### Privacy (`/privacy`)
-
-Privacy policy page with:
-- Information collection practices
-- Data storage details
-- Cookie usage
-- User rights
-- Security measures
-
-### 404 (`/not-found`)
-
-Custom 404 error page with:
-- Clean error message
-- Navigation links
+Set `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8000`) to point at the backend.
+It is baked in at build time — **redeploy after changing it.**
 
 ## Components
 
-### Sidebar
+| Component | Role |
+|-----------|------|
+| `LatexEditor` | Monaco-based LaTeX editor |
+| `PdfViewer` / `PdfThumbnail` | react-pdf preview and dashboard thumbnails |
+| `AgentPanel` | The agent chat (full-width bottom sheet on mobile) + document-feature checklist |
+| `Sidebar` | Session/project navigation |
+| `DocTypeCarousel` | Auto-gliding document-type strip on the landing page |
+| `HowItWorks` | Auto-cycling prompt → cards → compiled-page showcase |
+| `StorySection` | Scroll-revealed "sentence to PDF" timeline |
+| `DotIcon` / `DotTick` | Landing icons drawn as twinkling dots |
+| `PixelBlast` | Animated pixel-field hero backdrop |
 
-- Hamburger menu button (hides when sidebar open)
-- Sessions list with conversation history
-- New chat button
-- Settings panel
-- User info with logout
+## Pages
 
-### AuthProvider
+- **`/`** — Landing: hero (logo + "Academic writing, refined."), document-type
+  carousel, feature grid, story timeline, visualizations showcase, CTA.
+- **`/login` · `/register`** — Session auth.
+- **`/onboarding`** — Four-step first-run flow (welcome → use case → discovery →
+  done), persisted to the user record.
+- **`/app`** — Dashboard: start a new project, drop in files (CSV / image / PDF),
+  and open recent projects.
+- **`/app/editor`** — The core workspace (below).
+- **`/about` · `/contact` · `/terms` · `/privacy`** — Static pages.
 
-React context providing:
-- `user`: Current user object or null
-- `loading`: Authentication loading state
-- `login()`: Login function
-- `register()`: Registration function
-- `logout()`: Logout function
+## The editor (`/app/editor`)
 
-## API Integration
+- **Live generation** — the LaTeX streams in character by character; the agent
+  panel narrates planning → generating → compiling → fixing.
+- **Split view** — Monaco editor beside the PDF, with a **draggable resizer**.
+  Toggle `main.tex` to hide the code and enter a centered **focus view** of the PDF.
+- **Refine by conversation** — type a change ("remove this section") and the agent
+  edits the current document, recompiles, and updates the PDF in place.
+- **Attachments** — CSV (data-grounded tables/charts), images
+  (`\includegraphics`), and **PDF reference papers** (grounding + review).
+- **Review** — the **Review** button critiques the draft (and any attached papers)
+  and opens a panel of severity-ranked suggestions; each has **Apply with agent**,
+  which sends that suggestion back as a targeted edit.
+- **Export** — download the compiled PDF or the raw `.tex`.
+- **Mobile** — the toolbar collapses to icons, panes stack vertically, and the
+  agent becomes a bottom sheet.
 
-### api.agent.stream()
+## API client (`src/lib/api.ts`)
 
-Streams document generation in real-time.
-
-```typescript
-const result = await api.agent.stream(
-  prompt: string,
-  onChunk: (data: AgentEvent) => void,
-  conversationHistory: Array<{role: string; content: string}>
-);
+```ts
+api.auth        // register, login, logout, me, saveOnboarding
+api.files       // upload(file)  → CSV | image | PDF, returns { file_id, kind, ... }
+api.agent       // stream(prompt, onChunk, history, convId, fileIds)
+                // compile(latex, fileIds), review(latex, fileIds)
+                // submitAsync(prompt), getStatus(jobId)
+api.documents   // list, get, create, delete, getVersions, getVersion
+api.conversations // list, get, delete, touch
 ```
 
-### api.auth
+- **`agent.stream`** consumes Server-Sent Events; `onChunk` receives
+  `{ status, latex, pdf_url, message, ... }` (status ∈
+  `planning · generating · compiling · fixing · done · failed`).
+- **`agent.review`** resolves to `{ summary, suggestions[], reviewed_papers[] }`.
+- All requests go through `fetchWithCookies` (credentials included) so the
+  session cookie authenticates every call.
 
-- `login(email, password)`
-- `register(email, password)`
-- `logout()`
-- `me()`
+## Auth context (`src/lib/auth.tsx`)
 
-### api.conversations
+`AuthProvider` exposes `{ user, loading, login, register, logout }`; the app reads
+it to gate routes and personalize the header.
 
-- `list()`: Get all conversations
-- `get(id)`: Get specific conversation
-- `delete(id)`: Delete conversation
+## Theming
 
-## State Management
-
-Editor page manages:
-- `prompt`: Current user input
-- `latexCode`: Generated/stored LaTeX code
-- `pdfUrl`: Compiled PDF URL
-- `status`: Generation status (idle, planning, generating, compiling, fixing, done, error)
-- `conversationHistory`: Recent messages for AI context
-- `currentConversationId`: Active session ID
-
-## Styling
-
-Uses CSS variables for theming:
-
-```css
---bg-base        /* Main background */
---bg-surface    /* Card/panel background */
---accent        /* Primary accent color (amber) */
---text-primary  /* Primary text */
---text-secondary /* Secondary text */
---border        /* Border color */
-```
+CSS variables in `globals.css` (`--bg-base`, `--bg-surface`, `--accent`,
+`--text-primary`, `--border`, …). Headings and brand text use Pixelify Sans;
+a `@media (max-width: 768px)` block handles the mobile layout.
 
 ## Scripts
 
 ```bash
-npm run dev    # Start development server
-npm run build  # Build for production
-npm run start  # Start production server
+npm install
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+npm run dev      # http://localhost:3000
+npm run build    # production build
+npm run start    # serve the production build
 ```
