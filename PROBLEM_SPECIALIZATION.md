@@ -52,6 +52,8 @@ Particl Agent solves the fundamental problem of **LaTeX being extremely error-pr
 **1. Plan** - User describes document in plain English
 - "Create a research paper with abstract, introduction, and methodology"
 - Agent understands structure and requirements
+- **Optionally uploads files alongside the prompt**: a CSV of data, images for
+  figures, or PDF reference papers to ground the work in real research
 
 **2. Research** - Agent analyzes what's needed
 - Which LaTeX packages are safe to use?
@@ -80,7 +82,8 @@ Particl Agent solves the fundamental problem of **LaTeX being extremely error-pr
 - Returns severity-ranked suggestions: missing citations, stub sections,
   math-mode slips, unsupported claims, structural gaps
 - Grounded in attached reference papers — points out exactly where they
-  should be cited in the user's own work
+  should be cited, and flags content in the draft that doesn't line up
+  with what the uploaded papers actually say
 - Every suggestion has an **"Apply with agent"** action: one click sends it
   back as a targeted edit, and the document recompiles
 

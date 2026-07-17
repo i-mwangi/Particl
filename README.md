@@ -28,12 +28,13 @@ Particl removes LaTeX as a barrier. No syntax, no missing packages, no cryptic c
 
 **How a document happens:**
 
-1. **Describe it in plain English** — a resume, a lab report, a thesis, a slide deck.
+1. **Describe it in plain English** — a resume, a lab report, a thesis, a slide deck — and optionally attach files: a CSV of data, images for figures, or PDF reference papers.
 2. **Watch it write itself** — the LaTeX streams in live as the agent plans the structure.
-3. **Data becomes documents** — upload a CSV and it builds tables and charts from your real numbers, never invented ones.
+3. **Your files become the document** — CSV rows turn into tables and charts from your real numbers (never invented ones), images are placed with captions, and attached papers ground the content and its citations.
 4. **It fixes its own mistakes** — compile errors are read, corrected, and recompiled automatically (up to 3 attempts) until the PDF builds.
 5. **Refine by conversation** — ask for changes in plain language, or edit the code directly and recompile.
-6. **Export and share** — download the PDF or the raw `.tex`.
+6. **Get it reviewed** — the agent critiques the draft like a supervisor and checks it against your attached reference papers, flagging missing citations and content that doesn't line up with them; every suggestion has one-click **Apply with agent**.
+7. **Export and share** — download the PDF or the raw `.tex`.
 
 ## Features
 
