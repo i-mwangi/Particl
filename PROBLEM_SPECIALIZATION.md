@@ -57,6 +57,7 @@ Particl Agent solves the fundamental problem of **LaTeX being extremely error-pr
 - Which LaTeX packages are safe to use?
 - What document class is appropriate?
 - What structure matches the user's intent?
+- **Reads attached reference papers (PDF)** — extracts their text so the document is grounded in real definitions, methods, and findings, and cites them where they belong
 
 **3. Generate** - Creates LaTeX code in real-time
 - Streams code character-by-character
@@ -74,7 +75,16 @@ Particl Agent solves the fundamental problem of **LaTeX being extremely error-pr
 - Recompiles (up to 3 attempts)
 - **95% success rate** in fixing errors autonomously
 
-**6. Deliver** - Perfect PDF ready to download
+**6. Review** - Agent critiques the draft on demand
+- Reads the whole document the way a supervisor would
+- Returns severity-ranked suggestions: missing citations, stub sections,
+  math-mode slips, unsupported claims, structural gaps
+- Grounded in attached reference papers — points out exactly where they
+  should be cited in the user's own work
+- Every suggestion has an **"Apply with agent"** action: one click sends it
+  back as a targeted edit, and the document recompiles
+
+**7. Deliver** - Perfect PDF ready to download
 - No debugging required from user
 - No error messages to decipher
 - Professional quality guaranteed
@@ -221,6 +231,8 @@ When users need LaTeX, it's for:
 3. **Researches Safe Packages** - Knows which packages work (6,000+ available, uses guaranteed ones)
 4. **Self-Corrects Autonomously** - Fixes 95% of errors without human help
 5. **Real-time Streaming** - Shows generation progress (builds user trust)
+6. **Grounds Documents in Real Research** - Reads attached reference papers (PDF) and data files (CSV) so content, citations, tables, and charts come from real sources — never invented
+7. **Reviews Drafts Like a Supervisor** - Critiques structure, citations, math, clarity, and rigor with severity-ranked suggestions, each applicable in one click
 
 ### The Agentic Workflow
 
@@ -250,6 +262,12 @@ When users need LaTeX, it's for:
 - Recompile automatically
 - Repeat up to 3 times
 - **95% success rate**
+
+**Review Phase (On Demand):**
+- Read the full draft plus any attached reference papers
+- Surface what a supervisor would flag: missing citations, stub sections,
+  equations outside math mode, unsupported claims, weak structure
+- Rank suggestions by severity; each can be applied by the agent in one click
 
 ### What This Agent Does NOT Do
 
@@ -358,7 +376,7 @@ No LaTeX knowledge required. Just describe what you want.
 
 **The Problem:** LaTeX is full of cryptic errors that most people can't understand or fix. Debugging takes hours and often fails, causing missed deadlines and abandoned projects.
 
-**The Solution:** Particl Agent is an autonomous system that plans, researches, generates, compiles, and self-corrects LaTeX documents without human intervention.
+**The Solution:** Particl Agent is an autonomous system that plans, researches, generates, compiles, and self-corrects LaTeX documents without human intervention — then goes further: it grounds documents in the user's own reference papers and **reviews drafts like a supervisor**, with ranked suggestions the agent can apply in one click.
 
 **Key Innovation:** Agentic self-correction loop with 95% success rate - the agent reads error logs, understands what's wrong, fixes the code, and recompiles automatically.
 
@@ -370,4 +388,4 @@ No LaTeX knowledge required. Just describe what you want.
 
 **Mission:** Eliminate LaTeX errors as a barrier. Make professional document formatting accessible through plain English, with zero debugging required.
 
-**This isn't just a LaTeX generator. It's an autonomous error-correction system that thinks, plans, and fixes problems like an expert would.**
+**This isn't just a LaTeX generator. It's an autonomous system that thinks, plans, and fixes problems like an expert — and reviews your writing like a supervisor.**
