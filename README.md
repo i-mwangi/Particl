@@ -4,9 +4,9 @@
 
 # Particl
 
-**What if LaTeX wrote itself?**
+**Academic writing, *refined.***
 
-Describe the document you want in plain English — Particl's agent writes the LaTeX, compiles it, fixes its own mistakes, and hands you a polished PDF.
+An intelligent LaTeX writing companion that understands your research — streamlining structure, getting the mathematics right, reading your reference papers, and offering contextual suggestions to elevate your drafts.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.135+-green.svg)](https://fastapi.tiangolo.com/)
