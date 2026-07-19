@@ -1,8 +1,14 @@
 name: Build backend image
 
-# Builds backend/Dockerfile (FastAPI + TeX Live) and pushes it to the GitHub
-# Container Registry, so Azure App Service can pull it. Runs on backend changes
-# or manually from the Actions tab.
+# Builds backend/Dockerfile (FastAPI + TeX Live) and pushes it to Alibaba Cloud
+# Container Registry (ACR), so the ECS instance can pull it. Runs on backend
+# changes or manually from the Actions tab.
+#
+# Requires four repository secrets (Settings -> Secrets and variables -> Actions):
+#   ACR_REGISTRY  - e.g. registry-intl.ap-southeast-1.aliyuncs.com
+#   ACR_NAMESPACE - the ACR namespace you created
+#   ACR_USERNAME  - the ACR credential username
+#   ACR_PASSWORD  - the ACR credential password (or an access token)
 on:
   push:
     branches: [main]
@@ -14,22 +20,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
+      - name: Log in to Alibaba Cloud Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           push: true
-          tags: ghcr.io/i-mwangi/particl-backend:latest
+          tags: |
+            ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/particl-backend:latest
+            ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/particl-backend:${{ github.sha }}
