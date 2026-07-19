@@ -208,21 +208,67 @@ Particl/
 
 ## Deployment
 
-**Live production setup:**
+**Live production setup — all on Alibaba Cloud for the compute side:**
 
 - **Frontend** → **Vercel** (`particl-rho.vercel.app`). Root directory `frontend`; set `NEXT_PUBLIC_API_URL` to the backend URL (baked in at build time — redeploy after changing it).
-- **Backend** → **Azure App Service** (Linux container, B2 plan). The image (FastAPI + TeX Live, see `backend/Dockerfile`) is built by **GitHub Actions** on every `backend/**` change and pushed to the **GitHub Container Registry** (`ghcr.io/i-mwangi/particl-backend`); App Service pulls it. Secrets and runtime config (`FRONTEND_ORIGIN`, `COOKIE_SAMESITE=none`, `COOKIE_SECURE=true`, `LATEX_MAX_MEMORY_MB`) are set as Azure app settings.
+- **Backend** → **Alibaba Cloud ECS** (Elastic Compute Service, Linux). The Docker image (FastAPI + TeX Live, see [`backend/Dockerfile`](backend/Dockerfile)) is built by **GitHub Actions** on every `backend/**` change and pushed to **Alibaba Cloud Container Registry (ACR)**; the ECS instance pulls it and runs it behind HTTPS. Secrets and runtime config (`FRONTEND_ORIGIN`, `COOKIE_SAMESITE=none`, `COOKIE_SECURE=true`, `LATEX_MAX_MEMORY_MB`) are supplied as environment variables to the container.
+- **LLM** → **Alibaba Cloud Model Studio** (Qwen 3.7 via the DashScope OpenAI-compatible API) — the LLM backbone for generation, self-correction, and the review agent.
 - **Database & storage** → **Supabase**: run `backend/db/schema.sql` once; create a public-read `pdfs` storage bucket.
 - **Sessions & rate limiting** → **Upstash Redis**.
 
+### Proof of Alibaba Cloud usage
+
+The Alibaba Cloud API integration is instantiated in [`backend/graph/nodes.py`](backend/graph/nodes.py) — the Qwen 3.7 client points at the DashScope endpoint (`dashscope-intl.aliyuncs.com` or a workspace-scoped `*.maas.aliyuncs.com` URL) and is called on every generation, every self-correction retry, and every review pass. Backup call site: [`backend/services/llm_service.py`](backend/services/llm_service.py). Env-var wiring: [`backend/.env.example`](backend/.env.example).
+
+### Architecture
+
+```
+                     ┌─────────────────────────────────────────┐
+                     │              User (browser)              │
+                     └──────────────────┬───────────────────────┘
+                                        │  HTTPS
+                                        ▼
+             ┌───────────────────────────────────────────────────┐
+             │        Vercel — Next.js frontend                  │
+             │        (particl-rho.vercel.app)                   │
+             └──────────────────┬────────────────────────────────┘
+                                │  fetch  +  SSE stream
+                                ▼
+    ┌───────────────────────────────────────────────────────────────┐
+    │           Alibaba Cloud ECS  (Linux, Docker container)         │
+    │                                                                │
+    │   ┌────────────────────────────────────────────────────────┐   │
+    │   │  FastAPI  +  LangGraph agent  +  TeX Live (pdflatex)   │   │
+    │   └──────┬────────────┬──────────────┬──────────────┬──────┘   │
+    │          │            │              │              │          │
+    └──────────┼────────────┼──────────────┼──────────────┼──────────┘
+               │            │              │              │
+               ▼            ▼              ▼              ▼
+     ┌──────────────┐ ┌──────────┐ ┌───────────────┐ ┌──────────────┐
+     │  Alibaba     │ │ Supabase │ │  Supabase     │ │ Upstash      │
+     │  Cloud Model │ │ Postgres │ │  Storage      │ │ Redis        │
+     │  Studio      │ │ (users,  │ │  (compiled    │ │ (sessions,   │
+     │  (Qwen 3.7,  │ │  docs,   │ │  PDFs)        │ │  rate limit, │
+     │  DashScope)  │ │  convs)  │ │               │ │  file cache) │
+     └──────────────┘ └──────────┘ └───────────────┘ └──────────────┘
+
+     Deploy pipeline:
+       GitHub push (backend/**) ─► GitHub Actions ─► Alibaba Cloud
+       Container Registry (ACR) ─► ECS pulls latest image ─► restart
+```
+
+**Reading it:** the browser talks only to Vercel and to the backend on ECS. The backend fans out to four services — **Qwen (Alibaba Model Studio)** for the LLM, **Supabase Postgres** for records, **Supabase Storage** for the compiled PDFs, and **Upstash Redis** for sessions/rate limits/upload caches. `pdflatex` runs inside the same container as the FastAPI process; that's why the backend must be a container host, not serverless.
+
 > **Why a container, not serverless:** the backend spawns `pdflatex` and streams
 > long generations, so it needs a real runtime with TeX Live installed and no hard
-> request timeout — Vercel/Lambda-style functions can't host it. Size the plan
-> above the LaTeX memory cap (B2 = 3.5 GB comfortably covers `LATEX_MAX_MEMORY_MB=2048`).
+> request timeout — Vercel/Lambda-style functions can't host it. Size the ECS
+> instance above the LaTeX memory cap (4 GB RAM comfortably covers
+> `LATEX_MAX_MEMORY_MB=2048`).
 
 **Portable alternative:** the backend is host-agnostic — any container host
-(Railway, Render, Fly, ECS) works as long as the image includes TeX Live and it
-runs `uvicorn main:app --host 0.0.0.0` behind HTTPS with the env vars set.
+(Railway, Render, Fly, or a self-managed VM) works as long as the image includes
+TeX Live and it runs `uvicorn main:app --host 0.0.0.0` behind HTTPS with the env
+vars set. Alibaba Cloud ECS is the current production choice.
 
 **Security:** strong `JWT_SECRET`, `FRONTEND_ORIGIN` restricting CORS to your
 frontend, `SameSite=None; Secure` cookies for the cross-domain setup, and
