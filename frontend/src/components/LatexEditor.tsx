@@ -13,21 +13,21 @@ interface LatexEditorProps {
 
 // Plain-text rendering (no syntax colors) — the color belongs in the compiled
 // PDF, not the source. Keeps line numbers + minimap like the reference editor.
-// Warm "paper" theme to match the sepia app palette.
+// Light editor theme aligned with the app's neutral canvas and charcoal accent.
 const configureLatex: BeforeMount = (monaco) => {
-  monaco.editor.defineTheme("particl-paper", {
+  monaco.editor.defineTheme("particl-light", {
     base: "vs",
     inherit: true,
     rules: [],
     colors: {
-      "editor.background": "#fdfaf2",
-      "editor.foreground": "#3a3226",
-      "editorLineNumber.foreground": "#bcaf95",
-      "editorLineNumber.activeForeground": "#8a6a44",
-      "editor.lineHighlightBackground": "#f2ead8",
-      "editorCursor.foreground": "#8a6a44",
-      "editor.selectionBackground": "#e4d6b8",
-      "minimap.background": "#f4ecda",
+      "editor.background": "#f7f7f5",
+      "editor.foreground": "#242422",
+      "editorLineNumber.foreground": "#9a9893",
+      "editorLineNumber.activeForeground": "#242422",
+      "editor.lineHighlightBackground": "#e7e6e3",
+      "editorCursor.foreground": "#242422",
+      "editor.selectionBackground": "#d0cfcc",
+      "minimap.background": "#e7e6e3",
     },
   });
 };
@@ -70,7 +70,7 @@ export default function LatexEditor({
       <Editor
         value={value}
         language="plaintext"
-        theme="particl-paper"
+        theme="particl-light"
         beforeMount={configureLatex}
         onMount={handleMount}
         onChange={(v) => onChange(v ?? "")}

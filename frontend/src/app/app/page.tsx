@@ -128,15 +128,12 @@ export default function AppDashboard() {
         <PixelBlast
           variant="square"
           pixelSize={4}
-          color="#bfa980"
+          color="#686660"
           patternScale={2}
-          patternDensity={1}
-          enableRipples
-          rippleSpeed={0.4}
-          rippleThickness={0.12}
-          rippleIntensityScale={1.5}
-          speed={0.5}
-          edgeFade={0.25}
+          patternDensity={0.55}
+          enableRipples={false}
+          speed={0.16}
+          edgeFade={0.45}
           transparent
         />
       </div>
@@ -237,7 +234,7 @@ export default function AppDashboard() {
         >
           Documents that write,
           <br />
-          <em style={{ color: "var(--accent)" }}>themselves.</em>
+          <em style={{ color: "var(--text-primary)" }}>themselves.</em>
         </h1>
         <p style={{ fontSize: "15px", color: "var(--text-muted)", marginBottom: "36px" }}>
           The intelligent LaTeX companion that understands your data.
@@ -260,11 +257,12 @@ export default function AppDashboard() {
           }}
           style={{
             border: isDragOver
-              ? "2px dashed var(--accent)"
-              : "2px dashed var(--border)",
+              ? "1px dashed var(--accent)"
+              : "1px dashed rgba(36, 36, 34, 0.3)",
             borderRadius: "12px",
             padding: "36px 20px",
-            background: isDragOver ? "var(--bg-elevated)" : "var(--bg-surface)",
+            background: isDragOver ? "rgba(231, 230, 227, 0.72)" : "rgba(231, 230, 227, 0.5)",
+            backdropFilter: "blur(10px)",
             cursor: "pointer",
             transition: "all 0.15s ease",
             marginBottom: "20px",
@@ -378,7 +376,8 @@ export default function AppDashboard() {
             alignItems: "center",
             border: "1px solid var(--border)",
             borderRadius: "12px",
-            background: "var(--bg-surface)",
+            background: "rgba(231, 230, 227, 0.5)",
+            backdropFilter: "blur(10px)",
             padding: "6px 6px 6px 16px",
           }}
         >
@@ -412,7 +411,7 @@ export default function AppDashboard() {
               borderRadius: "10px",
               border: "none",
               background: prompt.trim() && !isUploading ? "var(--accent)" : "var(--bg-elevated)",
-              color: prompt.trim() && !isUploading ? "#fff" : "var(--text-muted)",
+              color: prompt.trim() && !isUploading ? "var(--text-on-accent)" : "var(--text-muted)",
               cursor: prompt.trim() && !isUploading ? "pointer" : "not-allowed",
               display: "flex",
               alignItems: "center",
@@ -516,7 +515,7 @@ export default function AppDashboard() {
           height: 30px;
           border-radius: 8px;
           border: none;
-          background: rgba(12, 12, 14, 0.7);
+          background: rgba(231, 230, 227, 0.88);
           backdrop-filter: blur(4px);
           color: var(--error);
           display: flex;

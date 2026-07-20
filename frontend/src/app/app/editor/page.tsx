@@ -950,12 +950,12 @@ export default function EditorPage() {
             {status === "compiling" || isStreaming ? (
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" strokeOpacity="0.3" /><path d="M12 2a10 10 0 0 1 10 10" /></svg>
             ) : (
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={!latexCode.trim() ? "var(--text-muted)" : "#fff"} strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={!latexCode.trim() ? "var(--text-muted)" : "var(--text-on-accent)"} strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
             )}
             <span className="tb-label" style={{
               fontSize: "12px",
               fontWeight: 600,
-              color: !latexCode.trim() || status === "compiling" || isStreaming ? "var(--text-muted)" : "#fff",
+              color: !latexCode.trim() || status === "compiling" || isStreaming ? "var(--text-muted)" : "var(--text-on-accent)",
             }}>
               {status === "compiling" ? "Compiling..." : "Compile"}
             </span>
@@ -1226,7 +1226,7 @@ export default function EditorPage() {
                 ? "rgba(248, 113, 113, 0.08)"
                 : status === "compiling"
                 ? "rgba(96, 165, 250, 0.08)"
-                : "rgba(74, 222, 128, 0.08)",
+                : "var(--success-dim)",
               backdropFilter: "blur(4px)",
               border: `1px solid ${
                 isLiveEditing
@@ -1237,7 +1237,7 @@ export default function EditorPage() {
                   ? "rgba(248, 113, 113, 0.2)"
                   : status === "compiling"
                   ? "rgba(96, 165, 250, 0.2)"
-                  : "rgba(74, 222, 128, 0.2)"
+                  : "var(--success-glow)"
               }`,
               display: "flex",
               alignItems: "center",
@@ -1724,7 +1724,7 @@ export default function EditorPage() {
                               borderRadius: "999px",
                               border: "none",
                               background: isStreaming || status === "compiling" ? "var(--bg-hover)" : "var(--accent)",
-                              color: isStreaming || status === "compiling" ? "var(--text-muted)" : "#fff",
+                              color: isStreaming || status === "compiling" ? "var(--text-muted)" : "var(--text-on-accent)",
                               fontSize: "11px",
                               fontWeight: 600,
                               cursor: isStreaming || status === "compiling" ? "not-allowed" : "pointer",

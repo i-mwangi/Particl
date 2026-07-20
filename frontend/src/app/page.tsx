@@ -59,22 +59,19 @@ export default function Home() {
         <PixelBlast
           variant="square"
           pixelSize={4}
-          color="#bfa980"
+          color="#686660"
           patternScale={2}
-          patternDensity={1}
-          enableRipples
-          rippleSpeed={0.4}
-          rippleThickness={0.12}
-          rippleIntensityScale={1.5}
-          speed={0.5}
-          edgeFade={0.25}
+          patternDensity={0.55}
+          enableRipples={false}
+          speed={0.16}
+          edgeFade={0.45}
           transparent
         />
       </div>
 
       {/* Top-right sign in */}
       <div style={{ position: "absolute", top: "20px", right: "28px", zIndex: 50 }}>
-        <Link href="/login" className="pill-btn" style={{ padding: "8px 20px", fontSize: "13px", background: "var(--bg-surface)" }}>
+        <Link href="/login" className="pill-btn" style={{ padding: "8px 20px", fontSize: "13px", background: "rgba(231, 230, 227, 0.5)", borderColor: "rgba(36, 36, 34, 0.22)" }}>
           Sign in
         </Link>
       </div>
@@ -91,7 +88,7 @@ export default function Home() {
         <h1 style={{ fontSize: "44px", fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.15, marginBottom: "8px" }}>
           Documents that write,
           <br />
-          <em style={{ color: "var(--accent)" }}>themselves.</em>
+          <em style={{ color: "var(--text-primary)" }}>themselves.</em>
         </h1>
         <p style={{ fontSize: "15px", color: "var(--text-muted)", marginBottom: "36px" }}>
           The intelligent LaTeX companion that understands your research.
@@ -103,10 +100,11 @@ export default function Home() {
         <div
           onClick={goRegister}
           style={{
-            border: "2px dashed var(--border)",
+            border: "1px dashed rgba(36, 36, 34, 0.3)",
             borderRadius: "12px",
             padding: "36px 20px",
-            background: "var(--bg-surface)",
+            background: "rgba(231, 230, 227, 0.5)",
+            backdropFilter: "blur(10px)",
             cursor: "pointer",
             transition: "all 0.15s ease",
             marginBottom: "20px",
@@ -150,7 +148,8 @@ export default function Home() {
             alignItems: "center",
             border: "1px solid var(--border)",
             borderRadius: "12px",
-            background: "var(--bg-surface)",
+            background: "rgba(231, 230, 227, 0.5)",
+            backdropFilter: "blur(10px)",
             padding: "6px 6px 6px 16px",
           }}
         >
@@ -183,7 +182,7 @@ export default function Home() {
               borderRadius: "10px",
               border: "none",
               background: prompt.trim() ? "var(--accent)" : "var(--bg-elevated)",
-              color: prompt.trim() ? "#fff" : "var(--text-muted)",
+              color: prompt.trim() ? "var(--text-on-accent)" : "var(--text-muted)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",

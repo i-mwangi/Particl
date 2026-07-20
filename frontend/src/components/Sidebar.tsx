@@ -232,7 +232,7 @@ export default function Sidebar({ onSelectConversation, onNewChat, currentConver
               padding: "12px",
               borderRadius: "8px",
               background: "var(--accent)",
-              color: "#0c0c0e",
+              color: "var(--text-on-accent)",
               fontSize: "14px",
               fontWeight: "600",
               border: "none",

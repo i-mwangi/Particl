@@ -2,20 +2,24 @@
 @import "tailwindcss";
 
 :root {
-  --bg-base: #0c0c0e;
-  --bg-surface: #131316;
-  --bg-elevated: #1a1a1f;
-  --bg-hover: #22222a;
-  --border: #2a2a35;
-  --border-subtle: #1e1e26;
-  --text-primary: #f0ede6;
-  --text-secondary: #8a8a9a;
-  --text-muted: #55555f;
-  --accent: #f5a623;
-  --accent-dim: rgba(245, 166, 35, 0.12);
-  --accent-glow: rgba(245, 166, 35, 0.25);
-  --success: #4ade80;
-  --success-dim: rgba(74, 222, 128, 0.12);
+  --bg-base: #e7e6e3;
+  --bg-surface: #e7e6e3;
+  --bg-elevated: #e7e6e3;
+  --bg-hover: #d9d8d5;
+  --border: #c7c6c2;
+  --border-subtle: #deddda;
+  --text-primary: #242422;
+  --text-secondary: #5e5d59;
+  --text-muted: #7e7c77;
+  --accent: #242422;
+  --accent-deep: #151514;
+  --accent-light: #5e5d59;
+  --text-on-accent: #f7f7f5;
+  --accent-dim: rgba(36, 36, 34, 0.12);
+  --accent-glow: rgba(36, 36, 34, 0.2);
+  --success: #4b4a46;
+  --success-dim: rgba(75, 74, 70, 0.12);
+  --success-glow: rgba(75, 74, 70, 0.2);
   --error: #f87171;
   --error-dim: rgba(248, 113, 113, 0.12);
   --info: #60a5fa;
@@ -24,26 +28,28 @@
 
 /* ── Paper + purple theme (scoped: landing / auth / dashboard) ── */
 .theme-paper {
-  --bg-base: #f4ecda;
-  --bg-surface: #fdfaf2;
-  --bg-elevated: #efe7d5;
-  --bg-hover: #e9e0cc;
-  --border: rgba(60, 50, 35, 0.14);
-  --border-subtle: rgba(60, 50, 35, 0.07);
-  --text-primary: #3a3226;
-  --text-secondary: #7c6f58;
-  --text-muted: #a99a80;
-  --accent: #8a6a44;
-  --accent-dim: rgba(138, 106, 68, 0.14);
-  --accent-glow: rgba(138, 106, 68, 0.28);
-  --accent-deep: #6f5335;
-  --accent-light: #b79a6f;
-  --success: #3f8f5f;
-  --success-dim: rgba(63, 143, 95, 0.12);
-  --error: #c0503f;
-  --error-dim: rgba(192, 80, 63, 0.12);
-  --info: #4a72c4;
-  --info-dim: rgba(74, 114, 196, 0.12);
+  --bg-base: #e7e6e3;
+  --bg-surface: #e7e6e3;
+  --bg-elevated: #e7e6e3;
+  --bg-hover: #d9d8d5;
+  --border: #c7c6c2;
+  --border-subtle: #deddda;
+  --text-primary: #242422;
+  --text-secondary: #5e5d59;
+  --text-muted: #7e7c77;
+  --accent: #242422;
+  --accent-dim: rgba(36, 36, 34, 0.12);
+  --accent-glow: rgba(36, 36, 34, 0.2);
+  --accent-deep: #151514;
+  --accent-light: #5e5d59;
+  --text-on-accent: #f7f7f5;
+  --success: #4b4a46;
+  --success-dim: rgba(75, 74, 70, 0.12);
+  --success-glow: rgba(75, 74, 70, 0.2);
+  --error: #f87171;
+  --error-dim: rgba(248, 113, 113, 0.12);
+  --info: #60a5fa;
+  --info-dim: rgba(96, 165, 250, 0.12);
   background: var(--bg-base);
   color: var(--text-primary);
 }
@@ -69,11 +75,11 @@
   gap: 24px;
   padding: 9px 12px 9px 22px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(231, 230, 227, 0.7);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(26, 26, 46, 0.08);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 12px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(36, 36, 34, 0.08), 0 12px 40px rgba(36, 36, 34, 0.14);
 }
 
 .frosted {
@@ -106,7 +112,7 @@
 }
 .pill-btn-primary {
   border: none;
-  color: #fff;
+  color: var(--text-on-accent);
   background: var(--accent);
 }
 .pill-btn-primary:hover {
@@ -119,12 +125,12 @@
   background: var(--bg-surface);
   border-radius: 16px;
   border: 1px solid var(--border);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 12px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .soft-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.06), 0 20px 50px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
 }
 
 /* ── Story timeline (vertical, line + icon badges + scroll reveal) ── */
@@ -285,7 +291,7 @@ code, pre, .mono {
   /* Hero code overlay: the frosted glass is too see-through on a small panel,
      so the code behind bleeds into the message. Make it a solid dark card. */
   .frosted {
-    background: rgba(22, 15, 4, 0.88) !important;
+    background: rgba(231, 230, 227, 0.94) !important;
     -webkit-backdrop-filter: blur(4px) !important;
     backdrop-filter: blur(4px) !important;
     border-color: rgba(255, 255, 255, 0.16) !important;

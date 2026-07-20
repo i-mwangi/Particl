@@ -15,7 +15,7 @@ export default function About() {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "16px 48px",
-          background: "rgba(12, 12, 14, 0.95)",
+          background: "rgba(231, 230, 227, 0.95)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--border-subtle)",
         }}
@@ -29,7 +29,7 @@ export default function About() {
               dominantBaseline="middle"
               textAnchor="middle"
               fontSize="13"
-              fill="#0c0c0e"
+              fill="var(--text-on-accent)"
               fontFamily="JetBrains Mono, monospace"
               fontWeight="700"
             >
@@ -56,7 +56,7 @@ export default function About() {
               padding: "8px 20px",
               borderRadius: "8px",
               background: "var(--accent)",
-              color: "#0c0c0e",
+              color: "var(--text-on-accent)",
               fontSize: "14px",
               fontWeight: "600",
               textDecoration: "none",
@@ -169,7 +169,7 @@ export default function About() {
                 padding: "14px 32px",
                 borderRadius: "10px",
                 background: "var(--accent)",
-                color: "#0c0c0e",
+                color: "var(--text-on-accent)",
                 fontSize: "15px",
                 fontWeight: "600",
                 textDecoration: "none",
@@ -199,7 +199,7 @@ export default function About() {
               dominantBaseline="middle"
               textAnchor="middle"
               fontSize="13"
-              fill="#0c0c0e"
+              fill="var(--text-on-accent)"
               fontFamily="JetBrains Mono, monospace"
               fontWeight="700"
             >

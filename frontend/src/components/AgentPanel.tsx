@@ -83,7 +83,7 @@ function PersonAvatar() {
         marginTop: "2px",
       }}
     >
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-on-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </svg>
@@ -349,7 +349,7 @@ export default function AgentPanel({
                   padding: "8px 12px",
                   borderRadius: "12px 12px 2px 12px",
                   background: "var(--accent)",
-                  color: "#fff",
+                  color: "var(--text-on-accent)",
                   fontSize: "12px",
                   lineHeight: 1.5,
                   wordBreak: "break-word",
@@ -453,7 +453,7 @@ export default function AgentPanel({
                     }}
                   >
                     {on && (
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--text-on-accent)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     )}
@@ -504,7 +504,7 @@ export default function AgentPanel({
                 height: "14px",
                 borderRadius: "7px",
                 background: "var(--accent)",
-                color: "#fff",
+                color: "var(--text-on-accent)",
                 fontSize: "9px",
                 fontWeight: 700,
                 display: "flex",
@@ -554,7 +554,7 @@ export default function AgentPanel({
             borderRadius: "8px",
             border: "none",
             background: !input.trim() || isBusy ? "var(--bg-elevated)" : "var(--accent)",
-            color: !input.trim() || isBusy ? "var(--text-muted)" : "#fff",
+            color: !input.trim() || isBusy ? "var(--text-muted)" : "var(--text-on-accent)",
             cursor: !input.trim() || isBusy ? "not-allowed" : "pointer",
           }}
         >

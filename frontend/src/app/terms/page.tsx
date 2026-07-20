@@ -15,7 +15,7 @@ export default function Terms() {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "16px 48px",
-          background: "rgba(12, 12, 14, 0.95)",
+          background: "rgba(231, 230, 227, 0.95)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--border-subtle)",
         }}
