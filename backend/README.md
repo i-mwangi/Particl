@@ -150,6 +150,7 @@ Categories: `structure · citations · math · clarity · rigor · formatting ·
 # Qwen (Alibaba Cloud Model Studio)
 QWEN_API_KEY=sk-...            # or DASHSCOPE_API_KEY
 QWEN_MODEL=qwen3.7-plus
+QWEN_FALLBACK_MODELS=qwen3.5-plus-2026-02-15,qwen3-max,qwen-max   # tried in order if the primary errors or runs out of quota
 QWEN_BASE_URL=https://<WorkspaceId>.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1
 QWEN_MAX_OUTPUT_TOKENS=65536
 

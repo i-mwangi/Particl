@@ -53,6 +53,7 @@ export default function EditorPage() {
   const [attachedFiles, setAttachedFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const dragDepth = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [agentOpen, setAgentOpen] = useState(true);
   const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([]);
@@ -709,15 +710,23 @@ export default function EditorPage() {
           overflow: "hidden",
           position: "relative"
         }}
-        onDragOver={(e) => {
-          e.preventDefault();
+        onDragEnter={(e) => {
+          if (!Array.from(e.dataTransfer.types).includes("Files")) return;
+          dragDepth.current += 1;
           setIsDragOver(true);
         }}
+        onDragOver={(e) => {
+          if (Array.from(e.dataTransfer.types).includes("Files")) e.preventDefault();
+        }}
         onDragLeave={(e) => {
-          if (e.currentTarget === e.target) setIsDragOver(false);
+          if (!Array.from(e.dataTransfer.types).includes("Files")) return;
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setIsDragOver(false);
         }}
         onDrop={(e) => {
+          if (!Array.from(e.dataTransfer.types).includes("Files")) return;
           e.preventDefault();
+          dragDepth.current = 0;
           setIsDragOver(false);
           if (e.dataTransfer.files.length > 0) {
             uploadFiles(e.dataTransfer.files);
@@ -745,7 +754,7 @@ export default function EditorPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(244,236,218,0.82)",
+            background: "rgba(231, 230, 227, 0.88)",
             border: "2px dashed var(--accent)",
             borderRadius: "8px",
             pointerEvents: "none",

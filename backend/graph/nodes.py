@@ -13,19 +13,42 @@ from tools.latex_tools import compile_latex_tool
 load_dotenv()
 
 # Qwen via Alibaba Cloud Model Studio's OpenAI-compatible endpoint.
-# QWEN_MODEL: qwen3.7-plus (default, cost-effective) or qwen3.7-max (strongest).
-_llm = ChatOpenAI(
-    model=os.getenv("QWEN_MODEL", "qwen3.7-plus"),
-    api_key=os.getenv("QWEN_API_KEY") or os.getenv("DASHSCOPE_API_KEY") or "not-set",
-    base_url=os.getenv(
-        "QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-    ),
-    temperature=0.7,
-    # Allow long, comprehensive documents instead of truncating mid-way.
-    # (The fix loop re-emits the WHOLE document, so this must comfortably
-    # exceed the largest doc we generate.)
-    max_tokens=int(os.getenv("QWEN_MAX_OUTPUT_TOKENS", "65536")),
+_QWEN_API_KEY = os.getenv("QWEN_API_KEY") or os.getenv("DASHSCOPE_API_KEY") or "not-set"
+_QWEN_BASE_URL = os.getenv(
+    "QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 )
+# Allow long, comprehensive documents instead of truncating mid-way.
+# (The fix loop re-emits the WHOLE document, so this must comfortably
+# exceed the largest doc we generate.)
+_MAX_OUTPUT_TOKENS = int(os.getenv("QWEN_MAX_OUTPUT_TOKENS", "65536"))
+
+
+def _build_llm(model: str) -> ChatOpenAI:
+    return ChatOpenAI(
+        model=model,
+        api_key=_QWEN_API_KEY,
+        base_url=_QWEN_BASE_URL,
+        temperature=0.7,
+        max_tokens=_MAX_OUTPUT_TOKENS,
+    )
+
+
+# Primary model, then ordered fallbacks. Each Model Studio model carries its own
+# free-tier quota, so when the primary is exhausted (or rate-limited, or briefly
+# unavailable) the call transparently retries on the next model in the chain
+# instead of failing the whole generation.
+_PRIMARY_MODEL = os.getenv("QWEN_MODEL", "qwen3.7-plus")
+_FALLBACK_MODELS = [
+    m.strip()
+    for m in os.getenv(
+        "QWEN_FALLBACK_MODELS", "qwen3.5-plus-2026-02-15,qwen3-max,qwen-max"
+    ).split(",")
+    if m.strip() and m.strip() != _PRIMARY_MODEL
+]
+
+_llm = _build_llm(_PRIMARY_MODEL)
+if _FALLBACK_MODELS:
+    _llm = _llm.with_fallbacks([_build_llm(m) for m in _FALLBACK_MODELS])
 
 # System prompt: prioritise substance and clean academic structure over decoration.
 _GENERATE_SYSTEM = (
