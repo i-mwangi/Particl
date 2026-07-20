@@ -1,33 +1,37 @@
 name: Build backend image
 
-# SCAFFOLD - manual trigger only. Wire up a container registry before enabling.
+# Builds backend/Dockerfile (FastAPI + TeX Live) and pushes it to the GitHub
+# Container Registry. The Azure App Service deployment pulls this image.
 #
-# The live deployment currently builds the image directly on the ECS VM
-# (`git pull` + `docker build`), so no push-to-registry step is needed for the
-# demo. This workflow is left in the repo as ready-to-enable scaffolding: once
-# a container registry (Alibaba Cloud ACR, Docker Hub, etc.) is wired up, add
-# the four secrets below and re-enable the `push` trigger.
+# Also tags each build with the commit SHA so a deployment can be pinned to an
+# immutable digest (App Service caches the :latest tag and will not reliably
+# re-pull it on restart).
 #
-# Required repository secrets (Settings -> Secrets and variables -> Actions):
-#   ACR_REGISTRY  - e.g. registry-intl.ap-southeast-1.aliyuncs.com
-#   ACR_NAMESPACE - the registry namespace
-#   ACR_USERNAME  - the registry credential username
-#   ACR_PASSWORD  - the registry credential password (or an access token)
+# The Alibaba Cloud ECS deployment does NOT use this workflow - it builds the
+# image directly on the VM via `git pull` + `docker build`.
 on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/build-backend.yml"
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to Alibaba Cloud Container Registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.ACR_REGISTRY }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -35,5 +39,5 @@ jobs:
           context: ./backend
           push: true
           tags: |
-            ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/particl-backend:latest
-            ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/particl-backend:${{ github.sha }}
+            ghcr.io/i-mwangi/particl-backend:latest
+            ghcr.io/i-mwangi/particl-backend:${{ github.sha }}
