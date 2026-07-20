@@ -37,12 +37,29 @@ def _build_llm(model: str) -> ChatOpenAI:
 # free-tier quota, so when the primary is exhausted (or rate-limited, or briefly
 # unavailable) the call transparently retries on the next model in the chain
 # instead of failing the whole generation.
+# Ordered nearest-behaviour-first: same generation, then older generations, then
+# other families as a last resort. Vision/OCR/translation/"thinking" models are
+# deliberately excluded - they either cannot do long-form text or wrap output in
+# reasoning traces, both of which break "return LaTeX only".
+_DEFAULT_FALLBACKS = (
+    "qwen3.7-max-2026-06-08,"
+    "qwen3.7-max-preview,"
+    "qwen3.6-plus,"
+    "qwen3.6-max-preview,"
+    "qwen3.5-plus-2026-02-15,"
+    "qwen3.5-122b-a10b,"
+    "qwen3-max,"
+    "qwen-max,"
+    "qwen-plus-2025-07-28,"
+    "qwen3-32b,"
+    "glm-5.2,"
+    "glm-5.1"
+)
+
 _PRIMARY_MODEL = os.getenv("QWEN_MODEL", "qwen3.7-plus")
 _FALLBACK_MODELS = [
     m.strip()
-    for m in os.getenv(
-        "QWEN_FALLBACK_MODELS", "qwen3.5-plus-2026-02-15,qwen3-max,qwen-max"
-    ).split(",")
+    for m in os.getenv("QWEN_FALLBACK_MODELS", _DEFAULT_FALLBACKS).split(",")
     if m.strip() and m.strip() != _PRIMARY_MODEL
 ]
 
